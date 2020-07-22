@@ -1,0 +1,2 @@
+registrar(pcavAsynDriverRegister)
+driver(pcavAsynDriver)
