@@ -1,0 +1,400 @@
+
+#
+# Cavity Probe Configuration
+#
+
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)CHSEL")
+{
+    field(PINI, "YES")
+    field(DESC, "Channel Select for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)ChanSel")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDSTART")
+{
+    field(PINI, "YES")
+    field(DESC, "average window start for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)WindowStart")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
+{
+    field(PINI, "YES")
+    field(DESC, "average window end for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)WindowEnd")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+
+record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
+{
+    field(PINI, "YES")
+    field(DESC, "average window end for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)WindowEnd")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)CALIBCOEFF")
+{
+    field(PINI, "YES")
+    field(DESC, "Calibration Coeff for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CalibCoeff")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+
+#
+# Cavity Probe reading, Raw Value
+#
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFAMPL_RAW")
+{
+    field(DESC, "Raw value of IF Amplitude for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfAmplRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFPHASE_RAW")
+{
+    field(DESC, "Raw value of IF Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfPhaselRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFI_RAW")
+{
+    field(DESC, "Raw value of IF I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfIRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFQ_RAW")
+{
+    field(DESC, "Raw value of IF Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfQRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)DCREAL_RAW")
+{
+    field(DESC, "Raw value of DC Real for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCRealRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)DCIMAGE_RAW")
+{
+    field(DESC, "Raw value of DC Image for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCImageRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)DCFREQ_RAW")
+{
+    field(DESC, "Raw value of DC Freq for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCFreqRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)INTEGI_RAW")
+{
+    field(DESC, "Raw value of Integ I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IntegIRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)INTEGQ_RAW")
+{
+    field(DESC, "Raw value of Integ Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IntegQRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTPHASE_RAW")
+{
+    field(DESC, "Raw value of Out Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutPhaseRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTAMPL_RAW")
+{
+    field(DESC, "Raw value of Out Amplitude for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutAmplRaw")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPI_RAW")
+{
+    field(DESC, "Raw value of Comp I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompIRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPQ_RAW")
+{
+    field(DESC, "Raw value of Comp Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompQRaw")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPPHASE_RAW")
+{
+    field(DESC, "Raw value of Comp Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompPhaseRaw")
+    field(SCAN, "I/O Intr")
+}
+
+
+
+
+#
+# Cavity Probe reading, Engineering Conversion
+#
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)IFAMPL")
+{
+    field(DESC, "IF Amplitude for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfAmpl")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Amplitude")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)IFPHASE")
+{
+    field(DESC, "IF Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfPhase")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Degree")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)IFI")
+{
+    field(DESC, "IF I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfI")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)IFQ")
+{
+    field(DESC, "IF Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfQ")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)DCREAL")
+{
+    field(DESC, "DC Real for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCReal")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)DCIMAGE")
+{
+    field(DESC, "DC Image for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCImagel")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)DCFREQ")
+{
+    field(DESC, "DC Frequency for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCFREQ")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Hz")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)INTEGI")
+{
+    field(DESC, "Integrated I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IntegI")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)INTEGQ")
+{
+    field(DESC, "Integrated Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IntegQ")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTPHASE")
+{
+    field(DESC, "Out Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutPhase")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Degree")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTAMPL")
+{
+    field(DESC, "OUt Amplitude for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutAmpl")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Amplitude")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPI")
+{
+    field(DESC, "Comp I for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompIl")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPQ")
+{
+    field(DESC, "Comp Q for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompQ")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPPHASE")
+{
+    field(DESC, "Comp Phase for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompPhasel")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Degree")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+

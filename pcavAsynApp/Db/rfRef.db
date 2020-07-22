@@ -1,0 +1,148 @@
+#
+#   PCAV Sysgen Firmware Version
+#
+record(longin,  "$(DEVICE):PCAVVER")
+{
+    field(DESC, "PCAV sysgen firmware version")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) version")
+    field(SCAN, "I/O Intr")
+}
+
+
+#
+#   RF Reference Configuration
+#
+
+record(longout, "$(DEVICE):RFREFSEL")
+{
+    field(PINI, "YES")
+    field(DESC, "RF Reference Channel Select")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) rfRefSel")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):REFREFWNDSTART")
+{
+    field(PINI, "YES")
+    field(DESC, "RF Reference average window start")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) rfRefWindowStart")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):RFREFWNDEND")
+{
+    field(PINI, "YES")
+    field(DESC, "RF Reference average window end")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) rfRefWindowEnd")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+#
+#  RF Reference Monitoring, Raw Value
+#
+
+
+record(longin,  "$(DEVICE):RFREFAMPL_RAW")
+{
+    field(DESC, "RF Reference Amplitude Raw")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) rfRefAmplRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):RFREFPHASE_RAW")
+{
+    field(DESC, "RF Reference Phase Raw")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) rfRefPhaseRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):RFREFI_RAW")
+{
+    field(DESC, "RF Reference I Raw")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) rfRefIRaw")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin,  "$(DEVICE):RFREFQ_RAW")
+{
+    field(DESC, "RF Reference Q Raw")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) rfRefQRaw")
+    field(SCAN, "I/O Intr")
+}
+
+
+#
+#   RF Reference Monitoring, Egineering Unit Conversion
+#
+
+record(ai, "$(DEVICE):RFREFAMPL")
+{
+    field(DESC, "RF Reference Amplitude")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rfRefAmpl")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):RFREFPHASE")
+{
+    field(DESC, "RF Reference Phase")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rfRefPhase")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):RFREFI")
+{
+    field(DESC, "RF Reference I")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rfRefI")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):RFREFQ")
+{
+    field(DESC, "RF Reference Q")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rfRefQ")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+

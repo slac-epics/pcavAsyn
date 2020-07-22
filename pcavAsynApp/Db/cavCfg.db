@@ -1,0 +1,15 @@
+#
+# Cavity NCO control
+#
+
+record(ao, "$(DEVICE):CAV$(CAV)NCOPHASEADJ")
+{
+    field(PINI, "YES")
+    field(DESC, "NCO Phase Adjust for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)NCOPhaseAdj")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(EGU,  "Normalized Unit")
+    info(autosaveFields, "VAL")
+}
