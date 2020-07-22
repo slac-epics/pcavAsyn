@@ -50,7 +50,7 @@ class pcavAsynDriver
         uint32_t streamPollCnt;
         uint32_t stream_read_size;
 
-        uint8_t  buf[4096];
+        uint8_t  buf[4096];   // TBD, just for bstream debugging, need to make an official buffer handling
 
         void ParameterSetup(void);
         void monitor(void);
