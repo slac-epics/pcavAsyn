@@ -269,9 +269,10 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(param_name,     CAV_CHANSEL_STR,      cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavChanSel[cav][probe]));
             sprintf(param_name,     CAV_WINDOW_START_STR, cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowStart[cav][probe]));
             sprintf(param_name,     CAV_WINDOW_END_STR,   cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowEnd[cav][probe]));
+            sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavCalibCoeff[cav][probe]));
         }
         // cavity control, per cavity
-        sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamInt32, &(p_cavNCOPhaseAdj[cav]));
+        sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamFloat64, &(p_cavNCOPhaseAdj[cav]));
 
     }
     
