@@ -1,0 +1,22 @@
+file rfRef.db
+{
+    pattern  { DEVICE }
+             {"$(DEV)"}
+}
+
+file cavCfg.db
+{
+    pattern {    DEVICE,     CAV  }
+            {  "$(DEV)",       0  }
+            {  "$(DEV)",       1  }
+}
+
+
+file cavProb.db
+{
+    pattern {    DEVICE,     CAV,    PRB  }
+            {  "$(DEV)",       0,      0  }
+            {  "$(DEV)",       0,      1  }
+            {  "$(DEV)",       1,      0  }
+            {  "$(DEV)",       1,      1  }
+}
