@@ -43,6 +43,8 @@ class pcavAsynDriver
         char    *path;
         char    *stream;
         pcavFw  _pcav;
+        int32_t version;
+        uint32_t pollCnt;
 
         void ParameterSetup(void);
         void monitor(void);
@@ -53,7 +55,7 @@ class pcavAsynDriver
         int firstPcavParam;
 #define FIRST_PCAV_PARAM   firstPcavsParam
 #endif /* ASYN VERSION CHECK under 4.32 */
-
+        int     p_version;
         // rf reference 
         pcavMon p_rfRefAmpl;
         pcavMon p_rfRefPhase;
@@ -100,7 +102,7 @@ class pcavAsynDriver
 #define NUM_PCAV_DET_PARAMS ((int)(&LAST_PCAV_PARAM - &FIRST_PCAV_PARAM - 1))
 #endif /* ASYN VERSION CHECK under 4.32 */
 
-
+#define PCAV_VERSION_STR          "version"
 
 /* rf reference */
 

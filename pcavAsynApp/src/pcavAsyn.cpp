@@ -111,6 +111,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     path = epicsStrDup(pathString);
     stream = (bsaStream && strlen(bsaStream))?epicsStrDup(bsaStream): NULL;
     this->pDrv = pDrv;
+    pollCnt = 0;
 
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
@@ -186,10 +187,13 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
 void pcavAsynDriver::report(int interest)
 {
+    printf("\tpcavAsyn: version   : %d (%x)\n", version, version);
+    printf("\tpcavAsyn: poll count: %u\n", pollCnt);
 }
 
 void pcavAsynDriver::poll(void)
 {
+    pollCnt++;
     monitor();
     callParamCallbacks();
 }
@@ -199,6 +203,7 @@ void pcavAsynDriver::ParameterSetup(void)
 {
     char param_name[80];
     char raw_param_name[83];
+    sprintf(param_name,    PCAV_VERSION_STR); createParam(param_name, asynParamInt32, &p_version);
 
     // rf reference monitoring
     sprintf(param_name,     RFREF_AMPL_STR);            createParam(param_name,     asynParamFloat64, &(p_rfRefAmpl.val));
@@ -265,6 +270,9 @@ void pcavAsynDriver::monitor(void)
 {
     double      val;
     int32_t     raw;
+
+
+    _pcav->getVersion(&version); setIntegerParam(p_version, version);
 
     val = _pcav->getRefAmpl(&raw);   setDoubleParam(p_rfRefAmpl.val,  val); setIntegerParam(p_rfRefAmpl.raw,  raw);
     val = _pcav->getRefPhase(&raw);  setDoubleParam(p_rfRefPhase.val, val); setIntegerParam(p_rfRefPhase.raw, raw);  
