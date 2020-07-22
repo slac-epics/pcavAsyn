@@ -25,7 +25,7 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDSTART")
     info(autosaveFields, "VAL")
 }
 
-record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDEND")
 {
     field(PINI, "YES")
     field(DESC, "average window end for Cav$(CAV) Prb$(PRB)")
@@ -37,7 +37,7 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
 }
 
 
-record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDEND")
 {
     field(PINI, "YES")
     field(DESC, "average window end for Cav$(CAV) Prb$(PRB)")
@@ -48,7 +48,7 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)WNDEND")
     info(autosaveFields, "VAL")
 }
 
-record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)CALIBCOEFF")
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)CALIBCOEFF")
 {
     field(PINI, "YES")
     field(DESC, "Calibration Coeff for Cav$(CAV) Prb$(PRB)")
@@ -60,7 +60,7 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB($PRB)CALIBCOEFF")
 }
 
 
-#
+#DCImage
 # Cavity Probe reading, Raw Value
 #
 
@@ -76,7 +76,7 @@ record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFPHASE_RAW")
 {
     field(DESC, "Raw value of IF Phase for Cav$(CAV)Prb$(PRB)")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfPhaselRaw")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfPhaseRaw")
     field(SCAN, "I/O Intr")
 }
 
@@ -192,7 +192,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)IFAMPL")
     field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)IfAmpl")
     field(SCAN, "I/O Intr")
     field(PREC, "3")
-    field(EGU,  "Normalized Amplitude")
+    field(EGU,  "Normalized Unit")
     field(HHSV, "MAJOR")
     field(HSV,  "MINOR")
     field(LSV,  "MINOR")
@@ -267,7 +267,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)DCIMAGE")
 {
     field(DESC, "DC Image for Cav$(CAV)Prb$(PRB)")
     field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCImagel")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)DCImage")
     field(SCAN, "I/O Intr")
     field(PREC, "3")
     field(EGU,  "Normalized Unit")
@@ -345,7 +345,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTAMPL")
     field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutAmpl")
     field(SCAN, "I/O Intr")
     field(PREC, "3")
-    field(EGU,  "Normalized Amplitude")
+    field(EGU,  "Normalized Unit")
     field(HHSV, "MAJOR")
     field(HSV,  "MINOR")
     field(LSV,  "MINOR")
@@ -357,7 +357,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPI")
 {
     field(DESC, "Comp I for Cav$(CAV)Prb$(PRB)")
     field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompIl")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompI")
     field(SCAN, "I/O Intr")
     field(PREC, "3")
     field(EGU,  "Normalized Unit")
@@ -387,7 +387,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPPHASE")
 {
     field(DESC, "Comp Phase for Cav$(CAV)Prb$(PRB)")
     field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompPhasel")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompPhase")
     field(SCAN, "I/O Intr")
     field(PREC, "3")
     field(EGU,  "Degree")
