@@ -36,6 +36,7 @@ class pcavAsynDriver
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
         void report(int interest);
         void poll(void);
+        void pollStream(void);
 
     private:
         void    *pDrv;
@@ -43,8 +44,13 @@ class pcavAsynDriver
         char    *path;
         char    *stream;
         pcavFw  _pcav;
+        Stream  _bstream;
         int32_t version;
         uint32_t pollCnt;
+        uint32_t streamPollCnt;
+        uint32_t stream_read_size;
+
+        uint8_t  buf[4096];
 
         void ParameterSetup(void);
         void monitor(void);

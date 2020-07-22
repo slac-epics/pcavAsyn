@@ -112,10 +112,12 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     stream = (bsaStream && strlen(bsaStream))?epicsStrDup(bsaStream): NULL;
     this->pDrv = pDrv;
     pollCnt = 0;
+    streamPollCnt = 0;
 
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
         p_pcav = p_root->findByName(pathString);
+        if(stream) _bstream = IStream::create(p_root->findByName(stream));
     } catch (CPSWError &e) {
         fprintf(stderr, "CPSW Error: %s, file %s, line %d\n", e.getInfo().c_str(), __FILE__, __LINE__);
         throw e;
@@ -187,8 +189,10 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
 void pcavAsynDriver::report(int interest)
 {
-    printf("\tpcavAsyn: version   : %d (%x)\n", version, version);
-    printf("\tpcavAsyn: poll count: %u\n", pollCnt);
+    printf("\tpcavAsyn: version            : %d (%x)\n", version, version);
+    printf("\tpcavAsyn: poll count         : %u\n", pollCnt);
+    printf("\tpcavAsyn: bstream poll count : %u\n", streamPollCnt);
+    printf("\tpcavAsyn: bstream read size  : %u\n", stream_read_size);
 }
 
 void pcavAsynDriver::poll(void)
@@ -196,6 +200,14 @@ void pcavAsynDriver::poll(void)
     pollCnt++;
     monitor();
     callParamCallbacks();
+}
+
+void pcavAsynDriver::pollStream(void)
+{
+    while(stream) {
+        streamPollCnt++;
+        stream_read_size = _bstream->read(buf, 4096, CTimeout());
+    }
 }
 
 
@@ -354,6 +366,12 @@ static void pcavAsynDriverRegister(void)
 epicsExportRegistrar(pcavAsynDriverRegister);
 
 
+static int pcavAsynDriverStreamPoll(void *p)
+{
+    ((pcavAsynDriver*)p)->pollStream();
+
+    return 0;
+}
 
 static int pcavAsynDriverPoll(void)
 {
@@ -427,6 +445,21 @@ static int pcavAsynDriverInitialize(void)
     epicsThreadCreate(name, epicsThreadPriorityMedium,
                       epicsThreadGetStackSize(epicsThreadStackMedium),
                       (EPICSTHREADFUNC) pcavAsynDriverPoll, 0);
+
+    pDrvList_t *p = (pDrvList_t *) ellFirst(pDrvEllList);
+    while(p) {
+        if(p->pcavAsyn && p->bsaStream) {
+            char name[80];
+            sprintf(name, "bstream_%s", p->port);
+
+            epicsThreadCreate(name, epicsThreadPriorityHigh,
+                              epicsThreadGetStackSize(epicsThreadStackMedium),
+                              (EPICSTHREADFUNC) pcavAsynDriverStreamPoll, (void*) p->pcavAsyn);
+        }
+
+        p = (pDrvList_t*) ellNext(&p->node);
+
+    }
 
     epicsAtExit3((epicsExitFunc) stopPollingThread, (void*) epicsStrDup(name), epicsStrDup(name));
 
