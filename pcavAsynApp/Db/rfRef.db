@@ -25,7 +25,7 @@ record(longout, "$(DEVICE):RFREFSEL")
     info(autosaveFields, "VAL")
 }
 
-record(longout, "$(DEVICE):REFREFWNDSTART")
+record(longout, "$(DEVICE):RFREFWNDSTART")
 {
     field(PINI, "YES")
     field(DESC, "RF Reference average window start")
