@@ -37,17 +37,6 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDEND")
 }
 
 
-record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDEND")
-{
-    field(PINI, "YES")
-    field(DESC, "average window end for Cav$(CAV) Prb$(PRB)")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)WindowEnd")
-    field(SCAN, "Passive")
-    field(OMSL, "supervisory")
-    info(autosaveFields, "VAL")
-}
-
 record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)CALIBCOEFF")
 {
     field(PINI, "YES")
