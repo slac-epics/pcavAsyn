@@ -123,7 +123,8 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
         throw e;
     }
 
-    _pcav = IpcavFw::create(p_pcav);
+    _pcav      = IpcavFw::create(p_pcav);
+    _dacSigGen = IdacSigGenFw::create(p_root);
 
 
     ParameterSetup();
@@ -169,6 +170,7 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return status;
 }
 
+
 asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
     int        function      = pasynUser->reason;
@@ -186,6 +188,38 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     _escape:
     return status;
 }
+
+static epicsFloat64* __zero_pad(epicsFloat64 *value, epicsFloat64 *v, size_t nElements)
+{
+    if(nElements >= MAX_SAMPLES) return value;
+
+    int i;
+    for(i = 0; i < nElements;   i++)  *(v + i) = *(value + i);
+    for(     ; i < MAX_SAMPLES; i++)  *(v + i) = *(value + i);
+
+    return v;
+}
+
+
+asynStatus pcavAsynDriver::writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements)
+{
+    int        function      = pasynUser->reason;
+    asynStatus status        = asynSuccess;
+    const char *functionName = "writeFloat64Array";
+
+    epicsFloat64 v[MAX_SAMPLES];
+
+    if(function == i_baseband_wf) {
+        _dacSigGen->setIWaveform(__zero_pad(value, v, nElements));
+    } 
+    else if(function == q_baseband_wf) {
+        _dacSigGen->setQWaveform(__zero_pad(value, v, nElements));
+    }
+
+
+    return status;
+}
+
 
 void pcavAsynDriver::report(int interest)
 {
@@ -273,8 +307,11 @@ void pcavAsynDriver::ParameterSetup(void)
         }
         // cavity control, per cavity
         sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamFloat64, &(p_cavNCOPhaseAdj[cav]));
-
     }
+
+    // DacSigGen, baseline I&Q waveforms
+    sprintf(param_name, I_BASEBAND_STR); createParam(param_name, asynParamFloat64, &(i_baseband_wf));
+    sprintf(param_name, Q_BASEBAND_STR); createParam(param_name, asynParamFloat64, &(q_baseband_wf));
     
 }
 

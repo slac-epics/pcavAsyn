@@ -8,6 +8,7 @@
 
 #include <cpsw_api_user.h>
 #include <pcavFw.h>
+#include <dacSigGenFw.h>
 
 #include <vector>
 #include <string>
@@ -34,6 +35,7 @@ class pcavAsynDriver
         ~pcavAsynDriver();
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+        asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
         void report(int interest);
         void poll(void);
         void pollStream(void);
@@ -44,6 +46,7 @@ class pcavAsynDriver
         char    *path;
         char    *stream;
         pcavFw  _pcav;
+        dacSigGenFw _dacSigGen;
         Stream  _bstream;
         int32_t version;
         uint32_t pollCnt;
@@ -95,6 +98,10 @@ class pcavAsynDriver
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
 
+        // DacSigGen, baseline I&Q
+        int i_baseband_wf;
+        int q_baseband_wf;
+
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
         int lastPcavParam;
 #define LAST_PCAV_PARAM   lastPcavParam
@@ -144,6 +151,10 @@ class pcavAsynDriver
 
 /* 2 cavities */
 #define CAV_NCO_PHASE_ADJ_STR     "cav%dNCOPhaseAdj"
+
+/* bandband I & Q waveforms */
+#define I_BASEBAND_STR            "i_baseband_wf"         // baseband i waveform, length 4096
+#define Q_BASEBAND_STR            "q_baseband_wf"         // baseband q waveform, length 4096
 
 #define RAW_PARAM_STR             "%sRaw"
 

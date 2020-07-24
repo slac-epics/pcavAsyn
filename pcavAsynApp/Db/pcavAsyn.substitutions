@@ -1,7 +1,7 @@
 file rfRef.db
 {
-    pattern  { DEVICE }
-             {"$(DEV)"}
+    pattern  { DEVICE,   NELM_BB }
+             {"$(DEV)",     4096 }
 }
 
 file cavCfg.db

@@ -1,4 +1,33 @@
 #
+#   baseband I & Q waveform
+#
+
+record(waveform, "$(DEVICE):IBL")
+{
+    field(PINI, "YES")
+    field(DESC, "I baseband waveform")
+    field(DTYP, "asynFloat64ArrayOut")
+    field(INP,  "@asyn($(PORT),0) i_baseband_wf")
+    field(SCAN, "Passive")
+    field(FTVL, "DOUBLE")
+    field(NELM, "$(NELM_BB)")
+    info(autosaveFields, "VAL")
+}
+
+record(waveform, "$(DEVICE):QBL")
+{
+    field(PINI, "YES")
+    field(DESC, "Q baseband waveform")
+    field(DTYP, "asynFloat64ArrayOut")
+    field(INP,  "@asyn($(PORT),0) q_baseband_wf")
+    field(SCAN, "Passive")
+    field(FTVL, "DOUBLE")
+    field(NELM, "$(NELM_BB)")
+    info(autosaveFields, "VAL")
+}
+
+
+#
 #   PCAV Sysgen Firmware Version
 #
 record(longin,  "$(DEVICE):PCAVVER")
