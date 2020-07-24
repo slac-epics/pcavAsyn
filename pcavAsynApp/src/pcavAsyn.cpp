@@ -310,8 +310,8 @@ void pcavAsynDriver::ParameterSetup(void)
     }
 
     // DacSigGen, baseline I&Q waveforms
-    sprintf(param_name, I_BASEBAND_STR); createParam(param_name, asynParamFloat64, &(i_baseband_wf));
-    sprintf(param_name, Q_BASEBAND_STR); createParam(param_name, asynParamFloat64, &(q_baseband_wf));
+    sprintf(param_name, I_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(i_baseband_wf));
+    sprintf(param_name, Q_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(q_baseband_wf));
     
 }
 
