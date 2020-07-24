@@ -124,7 +124,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     }
 
     _pcav      = IpcavFw::create(p_pcav);
-    _dacSigGen = IdacSigGenFw::create(p_root);
+    _dacSigGen = IdacSigGenFw::create(p_root->findByName("mmio"));
 
 
     ParameterSetup();
