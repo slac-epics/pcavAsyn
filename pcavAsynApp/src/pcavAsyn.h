@@ -21,11 +21,26 @@
 
 #define NUM_CAV         2       // number of cavities
 #define NUM_PROBE       2       // number of probes per cavity 
+#define MAX_BSSS_BUF   36
 
 typedef struct {
     int raw;
     int val;
 } pcavMon;
+
+typedef struct {
+    epicsTimeStamp   time;
+    uint64_t         pulse_id;
+    uint32_t         chn_mask;
+    uint32_t         srv_mask;
+    uint32_t         payload[32+1];
+} bsss_packet_t;
+
+#define _SWAP_TIMESTAMP(TS)             \
+{    epicsUInt32 t = (TS)->nsec;        \
+     (TS)->nsec = (TS)->secPastEpoch;   \
+     (TS)->secPastEpoch = t;            }
+  
 
 
 class pcavAsynDriver
@@ -53,7 +68,8 @@ class pcavAsynDriver
         uint32_t streamPollCnt;
         uint32_t stream_read_size;
 
-        uint8_t  buf[4096];   // TBD, just for bstream debugging, need to make an official buffer handling
+        int             current_bsss;
+        bsss_packet_t   bsss_buf[MAX_BSSS_BUF];
 
         void ParameterSetup(void);
         void monitor(void);

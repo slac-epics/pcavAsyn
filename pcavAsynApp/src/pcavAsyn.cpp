@@ -113,6 +113,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     this->pDrv = pDrv;
     pollCnt = 0;
     streamPollCnt = 0;
+    current_bsss  = -1;
 
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
@@ -227,6 +228,24 @@ void pcavAsynDriver::report(int interest)
     printf("\tpcavAsyn: poll count         : %u\n", pollCnt);
     printf("\tpcavAsyn: bstream poll count : %u\n", streamPollCnt);
     printf("\tpcavAsyn: bstream read size  : %u\n", stream_read_size);
+    if(interest < 5) return;
+
+    char ts_str[80];
+    uint32_t t =0, u =1;
+    epicsTimeToStrftime(ts_str, sizeof(ts_str), "%Y/%m/%d %H:%M:%S.%09f", &((bsss_buf + current_bsss)->time));
+    printf("\tpcavAsyn: BSSS stream buffer(%d)\n",     current_bsss);
+    printf("\t          timestamp          : %s\n",    ts_str);
+    printf("\t          pulse id           : %lu\n",   (bsss_buf + current_bsss)->pulse_id);
+    printf("\t          channel mask       : %8.8x\n", (bsss_buf + current_bsss)->chn_mask);
+    printf("\t          service mask       : %8.8x\n", (bsss_buf + current_bsss)->srv_mask);
+
+    for(int i = 0; i < 32; i++) {
+        if((bsss_buf + current_bsss)->chn_mask & u) t++;
+        u <<= 1;
+    }
+
+    for(u = 0; u < t; u++) printf("\t          payload[%d]         : %8.8x\n", u, (bsss_buf + current_bsss)->payload[u]);
+    printf("\t          valid channel      : %8.8x\n", (bsss_buf + current_bsss)->payload[u]);
 }
 
 void pcavAsynDriver::poll(void)
@@ -240,7 +259,10 @@ void pcavAsynDriver::pollStream(void)
 {
     while(stream) {
         streamPollCnt++;
-        stream_read_size = _bstream->read(buf, 4096, CTimeout());
+        current_bsss++;
+        current_bsss = (current_bsss < MAX_BSSS_BUF)? current_bsss: 0;
+        stream_read_size = _bstream->read((uint8_t *) (bsss_buf + current_bsss), sizeof(bsss_packet_t), CTimeout());
+        _SWAP_TIMESTAMP(&((bsss_buf + current_bsss)->time));
     }
 }
 
