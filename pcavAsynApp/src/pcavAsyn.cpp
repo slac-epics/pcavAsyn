@@ -182,11 +182,15 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
     for(int i = 0; i < NUM_CAV; i++) {
         if(function == p_cavNCOPhaseAdj[i]) {
-            _pcav->setNCO(i, value); goto _escape;
+            uint32_t raw = _pcav->setNCO(i, value); 
+            setIntegerParam(raw, p_cavNCORaw[i]);
+            goto _escape;
         }
     }
 
     _escape:
+    callParamCallbacks();
+
     return status;
 }
 
@@ -329,6 +333,8 @@ void pcavAsynDriver::ParameterSetup(void)
         }
         // cavity control, per cavity
         sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamFloat64, &(p_cavNCOPhaseAdj[cav]));
+        // NCO raw set value
+        sprintf(param_name, CAV_NCO_RAW_STR, cav);       createParam(param_name, asynParamInt32,   &(p_cavNCORaw[cav]));
     }
 
     // DacSigGen, baseline I&Q waveforms

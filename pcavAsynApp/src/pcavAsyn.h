@@ -113,6 +113,7 @@ class pcavAsynDriver
 
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
+        int     p_cavNCORaw[NUM_CAV];
 
         // DacSigGen, baseline I&Q
         int i_baseband_wf;
@@ -167,6 +168,7 @@ class pcavAsynDriver
 
 /* 2 cavities */
 #define CAV_NCO_PHASE_ADJ_STR     "cav%dNCOPhaseAdj"
+#define CAV_NCO_RAW_STR           "cav%dNCORaw"          // NOC raw set value to verify
 
 /* bandband I & Q waveforms */
 #define I_BASEBAND_STR            "i_baseband_wf"         // baseband i waveform, length 4096

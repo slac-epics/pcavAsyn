@@ -13,3 +13,13 @@ record(ao, "$(DEVICE):CAV$(CAV)NCOPHASEADJ")
     field(EGU,  "Normalized Unit")
     info(autosaveFields, "VAL")
 }
+
+
+record(longin, "$(DEVICE):CAV$(CAV)NCORAW")
+{
+    field(DESC, "NCO Raw Set Value for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)NCORaw")
+    field(SCAN, "I/O Intr")
+    info(autosaveFields, "VAL")
+}
