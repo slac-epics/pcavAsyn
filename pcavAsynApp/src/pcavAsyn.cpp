@@ -183,7 +183,7 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     for(int i = 0; i < NUM_CAV; i++) {
         if(function == p_cavNCOPhaseAdj[i]) {
             uint32_t raw = _pcav->setNCO(i, value); 
-            setIntegerParam(raw, p_cavNCORaw[i]);
+            setIntegerParam(p_cavNCORaw[i], raw);
             goto _escape;
         }
     }
