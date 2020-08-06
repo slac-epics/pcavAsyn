@@ -36,6 +36,8 @@
 #include <asynPortDriver.h>
 #include <asynOctetSyncIO.h>
 
+#include <bldPvClient.h>
+
 #include "pcavAsyn.h"
 
 
@@ -267,9 +269,65 @@ void pcavAsynDriver::pollStream(void)
         current_bsss = (current_bsss < MAX_BSSS_BUF)? current_bsss: 0;
         stream_read_size = _bstream->read((uint8_t *) (bsss_buf + current_bsss), sizeof(bsss_packet_t), CTimeout());
         _SWAP_TIMESTAMP(&((bsss_buf + current_bsss)->time));
+
+        if((bsss_buf + current_bsss)->chn_mask == 0xffff) sendBldPacket(bsss_buf + current_bsss);
     }
 }
 
+
+void pcavAsynDriver::sendBldPacket(bsss_packet_t *p)
+{
+    unsigned int srcPhysicalID = 1;
+    unsigned int xtcType       = 0x10000 | 0x0010;
+
+    struct{
+        double phase;
+        double ampl;
+    } ref, c0p0, c0p1, c1p0, c1p1;
+
+    struct {
+        double time0;
+        double time1;
+        double charge0;
+        double charge1;
+    } bld_data;
+
+
+    ref.phase  = _FIX_18_16(p->payload[1]);
+    c0p0.phase = _FIX_18_16(p->payload[2]);
+    c0p0.ampl  = p->payload[3];
+    c0p1.phase = _FIX_18_16(p->payload[6]);
+    c0p1.ampl  = p->payload[7];
+    c1p0.phase = _FIX_18_16(p->payload[10]);
+    c1p0.ampl  = p->payload[11];
+    c1p1.phase = _FIX_18_16(p->payload[14]);
+    c1p1.ampl  = p->payload[15];
+
+    bld_data.time0 = (0.5 * (c0p0.phase + c0p1.phase) - ref.phase) / (2852. * 1.E+6);
+    bld_data.time1 = (0.5 * (c1p0.phase + c1p1.phase) - ref.phase) / (2852. * 1.E+6);
+    bld_data.charge0 = 0.5 * (c0p0.ampl + c0p1.ampl);
+    bld_data.charge1 = 0.5 * (c1p0.ampl + c1p1.ampl);
+
+    BldSendPacket(0, srcPhysicalID, xtcType, &(p->time), &bld_data, sizeof(bld_data));
+
+}
+
+
+/*    // test  cpde for BLD packet send
+void pcavAsynDriver::sendBldPacket(bsss_packet_t *p)
+{
+    static uint32_t cnt = 0;
+    static uint32_t a[4];
+
+    a[0] = cnt++; a[1] = cnt++; a[2] = cnt++; a[3] = cnt++;
+
+    size_t       size          = 16;
+    unsigned int srcPhysicalID = 1;
+    unsigned int xtcType       = 0x10000 | 0x0010;
+    BldSendPacket(0, srcPhysicalID, xtcType, &(p->time), a, size);
+
+}
+*/
 
 void pcavAsynDriver::ParameterSetup(void)
 {

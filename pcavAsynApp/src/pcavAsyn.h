@@ -40,6 +40,27 @@ typedef struct {
 {    epicsUInt32 t = (TS)->nsec;        \
      (TS)->nsec = (TS)->secPastEpoch;   \
      (TS)->secPastEpoch = t;            }
+
+#define _FIXED18_16_PHASE(P) \
+(((P) & 0x20000) ? ((double)(P) - (double)(0x40000)):(double)(P));
+
+
+#define _FIX_18_18(V) \
+(((V) & 0x20000) ? ((double)(V) - (double)(0x40000))/(double)(0x40000):(double)(V)/(double)(0x40000))
+
+#define _FIX_18_17(V) \
+(((V) & 0x20000) ? ((double)(V) - (double)(0x40000))/(double)(0x20000):(double)(V)/(double)(0x20000))
+
+#define _FIX_18_16(V) \
+(((V) & 0x20000) ? ((double)(V) - (double)(0x40000))/(double)(0x10000):(double)(V)/(double)(0x10000))
+
+#define _FIX_18_15(V) \
+(((V) & 0x20000) ? ((double)(V) - (double)(0x40000))/(double)(0x8000):(double)(V)/(double)(0x8000))
+
+
+
+
+//double phase = (p->payload[1] & 0x20000) ? (p->payload[1]-0x40000) : p->payload[1];
   
 
 
@@ -54,6 +75,7 @@ class pcavAsynDriver
         void report(int interest);
         void poll(void);
         void pollStream(void);
+        void sendBldPacket(bsss_packet_t *p);
 
     private:
         void    *pDrv;
