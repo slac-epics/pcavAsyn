@@ -33,6 +33,7 @@ pcavAsyn_LIBS += cpsw
 pcavAsyn_LIBS += pcavLib
 pcavAsyn_LIBS += asyn
 pcavAsyn_LIBS += yamlLoader
+pcavAsyn_LIBS += bldClient
 pcavAsyn_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 
