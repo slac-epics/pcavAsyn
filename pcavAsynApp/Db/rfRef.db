@@ -54,27 +54,6 @@ record(longout, "$(DEVICE):RFREFSEL")
     info(autosaveFields, "VAL")
 }
 
-record(longout, "$(DEVICE):RFREFWNDSTART")
-{
-    field(PINI, "YES")
-    field(DESC, "RF Reference average window start")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) rfRefWindowStart")
-    field(SCAN, "Passive")
-    field(OMSL, "supervisory")
-    info(autosaveFields, "VAL")
-}
-
-record(longout, "$(DEVICE):RFREFWNDEND")
-{
-    field(PINI, "YES")
-    field(DESC, "RF Reference average window end")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) rfRefWindowEnd")
-    field(SCAN, "Passive")
-    field(OMSL, "supervisory")
-    info(autosaveFields, "VAL")
-}
 
 #
 #  RF Reference Monitoring, Raw Value

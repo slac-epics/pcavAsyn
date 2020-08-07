@@ -109,8 +109,7 @@ class pcavAsynDriver
         pcavMon p_rfRefI;
         pcavMon p_rfRefQ;
         int     p_rfRefSel;
-        int     p_rfRefWindowStart;
-        int     p_rfRefWindowEnd;
+
 
         // 2 cavities, 2 probes
         pcavMon p_cavIfAmpl[NUM_CAV][NUM_PROBE];
@@ -167,8 +166,6 @@ class pcavAsynDriver
 #define RFREF_I_STR               "rfRefI"
 #define RFREF_Q_STR               "rfRefQ"
 #define RFREF_SEL_STR             "rfRefSel"
-#define RFREF_WINDOW_START_STR    "rfRefWindowStart"
-#define RFREF_WINDOW_END_STR      "rfRefWindowEnd"
 
 
 /*2 cavties and 2 probes */

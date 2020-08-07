@@ -147,8 +147,6 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     status = (asynStatus) setIntegerParam(function, value);
 
     if(function == p_rfRefSel)                 _pcav->setRefSel((uint32_t) value);
-    else if (function == p_rfRefWindowStart)   _pcav->setRefWindowStart((uint32_t) value);
-    else if (function == p_rfRefWindowEnd)     _pcav->setRefWindowEnd((uint32_t) value);
     else
 
     for(int i = 0; i < NUM_CAV; i++) {
@@ -362,8 +360,7 @@ void pcavAsynDriver::ParameterSetup(void)
     sprintf(raw_param_name, RAW_PARAM_STR, param_name); createParam(raw_param_name, asynParamInt32,   &(p_rfRefQ.raw));
     // rf reference control
     sprintf(param_name,     RFREF_SEL_STR);             createParam(param_name,     asynParamInt32,   &p_rfRefSel);
-    sprintf(param_name,     RFREF_WINDOW_START_STR);    createParam(param_name,     asynParamInt32,   &p_rfRefWindowStart);
-    sprintf(param_name,     RFREF_WINDOW_END_STR);      createParam(param_name,     asynParamInt32,   &p_rfRefWindowEnd);
+
 
 
     for(int cav = 0; cav < NUM_CAV; cav++) {
