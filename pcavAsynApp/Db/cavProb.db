@@ -37,17 +37,25 @@ record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)WNDEND")
 }
 
 
-record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)CALIBCOEFF")
+record(ao, "$(DEVICE):CAV$(CAV)PRB$(PRB)CALIBCOEFF")
 {
     field(PINI, "YES")
     field(DESC, "Calibration Coeff for Cav$(CAV) Prb$(PRB)")
-    field(DTYP, "asynInt32")
+    field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CalibCoeff")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    filed(EGU,  "Normalized Unit"
     info(autosaveFields, "VAL")
 }
 
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFAMPL_RAW")
+{
+    field(DESC, "Raw value Cal.Coeff for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CalibCoeffRaw")
+    field(SCAN, "I/O Intr")
+}
 
 #DCImage
 # Cavity Probe reading, Raw Value
@@ -138,23 +146,6 @@ record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTAMPL_RAW")
     field(DESC, "Raw value of Out Amplitude for Cav$(CAV)Prb$(PRB)")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)OutAmplRaw")
-    field(SCAN, "I/O Intr")
-}
-
-
-record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPI_RAW")
-{
-    field(DESC, "Raw value of Comp I for Cav$(CAV)Prb$(PRB)")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompIRaw")
-    field(SCAN, "I/O Intr")
-}
-
-record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPQ_RAW")
-{
-    field(DESC, "Raw value of Comp Q for Cav$(CAV)Prb$(PRB)")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompQRaw")
     field(SCAN, "I/O Intr")
 }
 
@@ -342,35 +333,7 @@ record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTAMPL")
     info(autosaveFields, "LOLO LOW HIGH HIHI")
 }
 
-record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPI")
-{
-    field(DESC, "Comp I for Cav$(CAV)Prb$(PRB)")
-    field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompI")
-    field(SCAN, "I/O Intr")
-    field(PREC, "3")
-    field(EGU,  "Normalized Unit")
-    field(HHSV, "MAJOR")
-    field(HSV,  "MINOR")
-    field(LSV,  "MINOR")
-    field(LLSV, "MAJOR")
-    info(autosaveFields, "LOLO LOW HIGH HIHI")
-}
 
-record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPQ")
-{
-    field(DESC, "Comp Q for Cav$(CAV)Prb$(PRB)")
-    field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CompQ")
-    field(SCAN, "I/O Intr")
-    field(PREC, "3")
-    field(EGU,  "Normalized Unit")
-    field(HHSV, "MAJOR")
-    field(HSV,  "MINOR")
-    field(LSV,  "MINOR")
-    field(LLSV, "MAJOR")
-    info(autosaveFields, "LOLO LOW HIGH HIHI")
-}
 
 record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)COMPPHASE")
 {

@@ -23,3 +23,42 @@ record(longin, "$(DEVICE):CAV$(CAV)NCORAW")
     field(SCAN, "I/O Intr")
     info(autosaveFields, "VAL")
 }
+
+
+
+#
+#
+#
+
+record(longout, "$(DEVICE):CAV$(CAV)FREQEVALSTART")
+{
+    field(PINI, "YES")
+    field(DESC, "freq eval start for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)FreqEvalStart")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):CAV$(CAV)FREQEVALEND")
+{
+    field(PINI, "YES")
+    field(DESC, "freq evak end for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)FreqEvalEnd")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(longout, "$(DEVICE):CAV$(CAV)REGLATCHPT")
+{
+    field(PINI, "YES")
+    field(DESC, "Reg Latch Point for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)RegLatchPoint")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}

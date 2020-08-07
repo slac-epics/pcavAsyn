@@ -152,6 +152,15 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     else
 
     for(int i = 0; i < NUM_CAV; i++) {
+        if(function == p_cavFreqEvalStart[i]) {
+            _pcav->setFreqEvalStart(i, (uint32_t) value); goto _escape;
+        }
+        if(function == p_cavFreqEvalEnd[i]) {
+            _pcav->setFreqEvalEnd(i, (uint32_t) value); goto _escape;
+        }
+        if(function == p_cavRegLatchPoint[i]) {
+            _pcav->setRegLatchPoint(i, (uint32_t) value); goto _escape;
+        }
         for(int j = 0; j < NUM_PROBE; j++) {
             if(function == p_cavChanSel[i][j]) {
                 _pcav->setChanSel(i, j, (uint32_t) value); goto _escape;
@@ -161,9 +170,6 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             }
             if(function == p_cavWindowEnd[i][j]) {
                 _pcav->setWindowEnd(i, j, (uint32_t) value); goto _escape;
-            }
-            if(function == p_cavCalibCoeff[i][j]) {
-                _pcav->setCalibCoeff(i, j, (uint32_t) value); goto _escape;
             }
         }
     }
@@ -188,7 +194,17 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
             setIntegerParam(p_cavNCORaw[i], raw);
             goto _escape;
         }
+
+        for(int j = 0; j < NUM_PROBE; j++) {
+            if(function == p_cavCalibCoeff[i][j]) {
+                unsigned raw;
+                raw = _pcav->setCalibCoeff(i, j, value);
+                setIntegerParam(p_cavCalibCoeffRaw[i][j], raw);
+                goto _escape;
+            }
+        }
     }
+
 
     _escape:
     callParamCallbacks();
@@ -375,22 +391,23 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavOutPhase[cav][probe].raw));
             sprintf(param_name,     CAV_OUT_AMPL_STR,     cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavOutAmpl[cav][probe].val));
             sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavOutAmpl[cav][probe].raw));
-            sprintf(param_name,     CAV_COMP_I_STR,       cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCompI[cav][probe].val));
-            sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavCompI[cav][probe].raw));
-            sprintf(param_name,     CAV_COMP_Q_STR,       cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCompQ[cav][probe].val));
-            sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavCompQ[cav][probe].raw));
+
             sprintf(param_name,     CAV_COMP_PHASE_STR,   cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCompPhase[cav][probe].val));
             sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavCompPhase[cav][probe].raw));
-            sprintf(param_name,     CAV_IF_WF_STR,        cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavIfWf[cav][probe].val));
-            sprintf(raw_param_name, RAW_PARAM_STR,        param_name); createParam(raw_param_name, asynParamInt32,   &(p_cavIfWf[cav][probe].raw));
+
             // cavity control, per probe
             sprintf(param_name,     CAV_CHANSEL_STR,      cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavChanSel[cav][probe]));
             sprintf(param_name,     CAV_WINDOW_START_STR, cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowStart[cav][probe]));
             sprintf(param_name,     CAV_WINDOW_END_STR,   cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowEnd[cav][probe]));
-            sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavCalibCoeff[cav][probe]));
+            sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCalibCoeff[cav][probe]));
+            sprintf(param_name,     CAV_CALIB_COEFF_RAW_STR, cav, probe); createParam(param_name,  asynParamInt32,   &(p_cavCalibCoeffRaw[cav][probe]));
         }
         // cavity control, per cavity
         sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamFloat64, &(p_cavNCOPhaseAdj[cav]));
+        sprintf(param_name, CAV_FREQ_EVAL_START_STR, cav); createParam(param_name, asynParamInt32, &(p_cavFreqEvalStart[cav]));
+        sprintf(param_name, CAV_FREQ_EVAL_END_STR,   cav); createParam(param_name, asynParamInt32, &(p_cavFreqEvalEnd[cav]));
+        sprintf(param_name, CAV_REG_LATCH_POINT_STR, cav); createParam(param_name, asynParamInt32, &(p_cavRegLatchPoint[cav]));
+
         // NCO raw set value
         sprintf(param_name, CAV_NCO_RAW_STR, cav);       createParam(param_name, asynParamInt32,   &(p_cavNCORaw[cav]));
     }
@@ -428,8 +445,7 @@ void pcavAsynDriver::monitor(void)
             val = _pcav->getIntegQ(i, j, &raw);     setDoubleParam(p_cavIntegQ[i][j].val,    val); setIntegerParam(p_cavIntegQ[i][j].raw,    raw);
             val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  val); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
             val = _pcav->getOutAmpl(i, j, &raw);    setDoubleParam(p_cavOutAmpl[i][j].val,   val); setIntegerParam(p_cavOutAmpl[i][j].raw,   raw);
-            val = _pcav->getCompI(i, j, &raw);      setDoubleParam(p_cavCompI[i][j].val,     val); setIntegerParam(p_cavCompI[i][j].raw,     raw);
-            val = _pcav->getCompQ(i, j, &raw);      setDoubleParam(p_cavCompQ[i][j].val,     val); setIntegerParam(p_cavCompQ[i][j].raw,     raw);
+
             val = _pcav->getCompPhase(i, j, &raw);  setDoubleParam(p_cavCompPhase[i][j].val, val); setIntegerParam(p_cavCompPhase[i][j].raw, raw);
         }
     }

@@ -44,7 +44,6 @@ typedef struct {
 #define _FIXED18_16_PHASE(P) \
 (((P) & 0x20000) ? ((double)(P) - (double)(0x40000)):(double)(P));
 
-
 #define _FIX_18_18(V) \
 (((V) & 0x20000) ? ((double)(V) - (double)(0x40000))/(double)(0x40000):(double)(V)/(double)(0x40000))
 
@@ -92,6 +91,7 @@ class pcavAsynDriver
 
         int             current_bsss;
         bsss_packet_t   bsss_buf[MAX_BSSS_BUF];
+        
 
         void ParameterSetup(void);
         void monitor(void);
@@ -127,11 +127,15 @@ class pcavAsynDriver
         pcavMon p_cavIntegQ[NUM_CAV][NUM_PROBE];
         pcavMon p_cavOutPhase[NUM_CAV][NUM_PROBE];
         pcavMon p_cavOutAmpl[NUM_CAV][NUM_PROBE];
-        pcavMon p_cavCompI[NUM_CAV][NUM_PROBE];
-        pcavMon p_cavCompQ[NUM_CAV][NUM_PROBE];
+
         pcavMon p_cavCompPhase[NUM_CAV][NUM_PROBE];
-        pcavMon p_cavIfWf[NUM_CAV][NUM_PROBE];       // TBD  cavIfWf
-        int     p_cavCalibCoeff[NUM_CAV][NUM_PROBE]; // TBD  cavCalibCoeff
+
+        int     p_cavFreqEvalStart[NUM_CAV];
+        int     p_cavFreqEvalEnd[NUM_CAV];
+        int     p_cavRegLatchPoint[NUM_CAV];
+
+        int     p_cavCalibCoeff[NUM_CAV][NUM_PROBE];
+        int     p_cavCalibCoeffRaw[NUM_CAV][NUM_PROBE];
 
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
@@ -182,11 +186,15 @@ class pcavAsynDriver
 #define CAV_INTEG_Q_STR           "cav%dP%dIntegQ"
 #define CAV_OUT_PHASE_STR         "cav%dP%dOutPhase"
 #define CAV_OUT_AMPL_STR          "cav%dP%dOutAmpl"
-#define CAV_COMP_I_STR            "cav%dP%dCompI"
-#define CAV_COMP_Q_STR            "cav%dP%dCompQ"
+
 #define CAV_COMP_PHASE_STR        "cav%dP%dCompPhase"
-#define CAV_IF_WF_STR             "cav%dP%dIfWf"         // space holder TBD
-#define CAV_CALIB_COEFF_STR       "cav%dP%dCalibCoeff"   // space holder TBD
+
+#define CAV_FREQ_EVAL_START_STR   "cav%dFreqEvalStart"
+#define CAV_FREQ_EVAL_END_STR     "cav%dFreqEvalEnd"
+#define CAV_REG_LATCH_POINT_STR   "cav%dRegLatchPoint"
+
+#define CAV_CALIB_COEFF_STR       "cav%dP%dCalibCoeff"
+#define CAV_CALIB_COEFF_RAW_STR   "cav%dP%dCalibCoeffRaw"
 
 /* 2 cavities */
 #define CAV_NCO_PHASE_ADJ_STR     "cav%dNCOPhaseAdj"
