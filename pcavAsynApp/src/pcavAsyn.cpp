@@ -129,6 +129,10 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     _pcav      = IpcavFw::create(p_pcav);
     _dacSigGen = IdacSigGenFw::create(p_root->findByName("mmio"));
 
+    for(int i = 0; i < NUM_CAV; i++) {
+        _coeff_time[i].a = _coeff_charge[i].a = 1.;
+        _coeff_time[i].b = _coeff_charge[i].b = 0.;
+    }
 
     ParameterSetup();
 
@@ -191,6 +195,19 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
             uint32_t raw = _pcav->setNCO(i, value); 
             setIntegerParam(p_cavNCORaw[i], raw);
             goto _escape;
+        }
+
+        if(function == p_coeff_time[i].a) {
+            _coeff_time[i].a = value;    goto _escape;
+        }
+        if(function == p_coeff_time[i].b) {
+            _coeff_time[i].b = value;    goto _escape;
+        }
+        if(function == p_coeff_charge[i].a) {
+            _coeff_charge[i].a = value;   goto _escape;
+        }
+        if(function == p_coeff_charge[i].b) {
+            _coeff_charge[i].b = value;   goto _escape;
         }
 
         for(int j = 0; j < NUM_PROBE; j++) {
@@ -281,11 +298,54 @@ void pcavAsynDriver::pollStream(void)
         streamPollCnt++;
         current_bsss++;
         current_bsss = (current_bsss < MAX_BSSS_BUF)? current_bsss: 0;
-        stream_read_size = _bstream->read((uint8_t *) (bsss_buf + current_bsss), sizeof(bsss_packet_t), CTimeout());
-        _SWAP_TIMESTAMP(&((bsss_buf + current_bsss)->time));
+        bsss_packet_t *p = bsss_buf + current_bsss;
+        stream_read_size = _bstream->read((uint8_t *) p, sizeof(bsss_packet_t), CTimeout());
+        _SWAP_TIMESTAMP(&(p->time));
+        setTimeStamp(&(p->time));
 
-        if((bsss_buf + current_bsss)->chn_mask == 0xffff) sendBldPacket(bsss_buf + current_bsss);
+        if(p->chn_mask == 0xffff) {
+            calcBldData(p);
+            sendBldPacket(p);
+            updateFastPVs();
+        }
     }
+}
+
+
+void pcavAsynDriver::calcBldData(bsss_packet_t *p)
+{
+    _ref.phase  = _FIX_18_16(p->payload[1]);
+    _c0p0.phase = _FIX_18_16(p->payload[2]);
+    _c0p0.ampl  = p->payload[3];
+    _c0p1.phase = _FIX_18_16(p->payload[6]);
+    _c0p1.ampl  = p->payload[7];
+    _c1p0.phase = _FIX_18_16(p->payload[10]);
+    _c1p0.ampl  = p->payload[11];
+    _c1p1.phase = _FIX_18_16(p->payload[14]);
+    _c1p1.ampl  = p->payload[15];
+
+    _bld_data.time0 = (0.5 * (_c0p0.phase + _c0p1.phase) - _ref.phase) / (2852. * 1.E+6);
+    _bld_data.time1 = (0.5 * (_c1p0.phase + _c1p1.phase) - _ref.phase) / (2852. * 1.E+6);
+    _bld_data.charge0 = 0.5 * (_c0p0.ampl + _c0p1.ampl);
+    _bld_data.charge1 = 0.5 * (_c1p0.ampl + _c1p1.ampl);
+
+    _bld_data.time0   = _coeff_time[0].a * _bld_data.time0 + _coeff_time[0].b;
+    _bld_data.time1   = _coeff_time[1].a * _bld_data.time1 + _coeff_time[1].b;
+    _bld_data.charge0 = _coeff_charge[0].a * _bld_data.charge0 + _coeff_charge[0].b;
+    _bld_data.charge1 = _coeff_charge[1].a * _bld_data.charge1 + _coeff_charge[1].b;
+
+}
+
+
+void pcavAsynDriver::updateFastPVs(void)
+{
+
+    setDoubleParam(p_result[0].time, _bld_data.time0);
+    setDoubleParam(p_result[1].time, _bld_data.time1);
+    setDoubleParam(p_result[0].charge, _bld_data.charge0);
+    setDoubleParam(p_result[1].charge, _bld_data.charge1);
+
+    callParamCallbacks();
 }
 
 
@@ -294,35 +354,7 @@ void pcavAsynDriver::sendBldPacket(bsss_packet_t *p)
     unsigned int srcPhysicalID = 1;
     unsigned int xtcType       = 0x10000 | 0x0010;
 
-    struct{
-        double phase;
-        double ampl;
-    } ref, c0p0, c0p1, c1p0, c1p1;
-
-    struct {
-        double time0;
-        double time1;
-        double charge0;
-        double charge1;
-    } bld_data;
-
-
-    ref.phase  = _FIX_18_16(p->payload[1]);
-    c0p0.phase = _FIX_18_16(p->payload[2]);
-    c0p0.ampl  = p->payload[3];
-    c0p1.phase = _FIX_18_16(p->payload[6]);
-    c0p1.ampl  = p->payload[7];
-    c1p0.phase = _FIX_18_16(p->payload[10]);
-    c1p0.ampl  = p->payload[11];
-    c1p1.phase = _FIX_18_16(p->payload[14]);
-    c1p1.ampl  = p->payload[15];
-
-    bld_data.time0 = (0.5 * (c0p0.phase + c0p1.phase) - ref.phase) / (2852. * 1.E+6);
-    bld_data.time1 = (0.5 * (c1p0.phase + c1p1.phase) - ref.phase) / (2852. * 1.E+6);
-    bld_data.charge0 = 0.5 * (c0p0.ampl + c0p1.ampl);
-    bld_data.charge1 = 0.5 * (c1p0.ampl + c1p1.ampl);
-
-    BldSendPacket(0, srcPhysicalID, xtcType, &(p->time), &bld_data, sizeof(bld_data));
+    BldSendPacket(0, srcPhysicalID, xtcType, &(p->time), &_bld_data, sizeof(_bld_data));
 
 }
 
@@ -407,6 +439,15 @@ void pcavAsynDriver::ParameterSetup(void)
 
         // NCO raw set value
         sprintf(param_name, CAV_NCO_RAW_STR, cav);       createParam(param_name, asynParamInt32,   &(p_cavNCORaw[cav]));
+
+        // linear conversion for BLD data
+        sprintf(param_name, COEFF_TIME_A_STR, cav);      createParam(param_name, asynParamFloat64,  &(p_coeff_time[cav].a));
+        sprintf(param_name, COEFF_TIME_B_STR, cav);      createParam(param_name, asynParamFloat64,  &(p_coeff_time[cav].b));
+        sprintf(param_name, COEFF_CHARGE_A_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_coeff_charge[cav].a));
+        sprintf(param_name, COEFF_CHARGE_B_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_coeff_charge[cav].b));
+        // time and charge
+        sprintf(param_name, TIME_STR, cav);              createParam(param_name, asynParamFloat64,  &(p_result[cav].time));
+        sprintf(param_name, CHARGE_STR, cav);            createParam(param_name, asynParamFloat64,  &(p_result[cav].charge));
     }
 
     // DacSigGen, baseline I&Q waveforms

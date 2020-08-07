@@ -1,0 +1,119 @@
+#
+#  Coefficients for Linear Conversion 
+#
+
+record(ao, "$(DEVICE):COEFFA_TIME$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Coeff A for time$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) coeffATime$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):COEFFB_TIME$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Coeff B for time$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) coeffBTime$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):COEFFA_CHRG$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Coeff A for charge(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) coeffACharge$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):COEFFB_CHRG$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Coeff B for charge(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) coeffBCharge$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+
+
+#
+#
+#
+
+record(ai, "$(DEVICE):FAST_TIME$(CAV)")
+{
+    field(DESC, "Arrival Time for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) time$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):TIME$(CAV)")
+{
+    field(DESC, "Arrival Time for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_TIME$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSEL, "$(DEVICE):FAST_TIME$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+
+record(ai, "$(DEVICE):FAST_CHRG$(CAV)")
+{
+    field(DESC, "Charge for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) charge$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):CHRG$(CAV)")
+{
+    field(DESC, "Charge for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_CHRG$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSEL, "$(DEVICE):FAST_CHRG$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+

@@ -20,3 +20,10 @@ file cavProb.db
             {  "$(DEV)",       1,      0  }
             {  "$(DEV)",       1,      1  }
 }
+
+file bld.db
+{
+    pattern {    DEVICE,     CAV,       SCAN  }
+            {  "$(DEV)",       0,  "1 second" }
+            {  "$(DEV)",       1,  "1 second" }
+}

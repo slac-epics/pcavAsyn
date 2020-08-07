@@ -74,7 +74,9 @@ class pcavAsynDriver
         void report(int interest);
         void poll(void);
         void pollStream(void);
+        void calcBldData(bsss_packet_t *p);
         void sendBldPacket(bsss_packet_t *p);
+        void updateFastPVs(void);
 
     private:
         void    *pDrv;
@@ -91,6 +93,23 @@ class pcavAsynDriver
 
         int             current_bsss;
         bsss_packet_t   bsss_buf[MAX_BSSS_BUF];
+
+        struct {
+            double phase;
+            double ampl;
+        } _ref, _c0p0, _c0p1, _c1p0, _c1p1;
+
+        struct {
+            double time0;
+            double time1;
+            double charge0;
+            double charge1;
+        } _bld_data;
+
+       struct {
+           double a;
+           double b;
+       } _coeff_time[NUM_CAV], _coeff_charge[NUM_CAV];
         
 
         void ParameterSetup(void);
@@ -139,6 +158,16 @@ class pcavAsynDriver
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
         int     p_cavNCORaw[NUM_CAV];
+
+        struct {
+            int a;
+            int b;
+        } p_coeff_time[NUM_CAV], p_coeff_charge[NUM_CAV];
+
+        struct {
+            int time;
+            int charge;
+        } p_result[NUM_CAV];
 
         // DacSigGen, baseline I&Q
         int i_baseband_wf;
@@ -196,6 +225,15 @@ class pcavAsynDriver
 /* 2 cavities */
 #define CAV_NCO_PHASE_ADJ_STR     "cav%dNCOPhaseAdj"
 #define CAV_NCO_RAW_STR           "cav%dNCORaw"          // NOC raw set value to verify
+
+/* linear conversion for BLD data */
+#define COEFF_TIME_A_STR         "coeffATime%d"
+#define COEFF_TIME_B_STR         "coeffBTime%d"
+#define COEFF_CHARGE_A_STR       "coeffACharge%d"
+#define COEFF_CHARGE_B_STR       "coeffBCharge%d"
+#define TIME_STR                 "time%d"
+#define CHARGE_STR               "charge%d"
+
 
 /* bandband I & Q waveforms */
 #define I_BASEBAND_STR            "i_baseband_wf"         // baseband i waveform, length 4096
