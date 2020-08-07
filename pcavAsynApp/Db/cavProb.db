@@ -45,7 +45,7 @@ record(ao, "$(DEVICE):CAV$(CAV)PRB$(PRB)CALIBCOEFF")
     field(OUT,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)CalibCoeff")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
-    filed(EGU,  "Normalized Unit"
+    field(EGU,  "Normalized Unit")
     info(autosaveFields, "VAL")
 }
 
