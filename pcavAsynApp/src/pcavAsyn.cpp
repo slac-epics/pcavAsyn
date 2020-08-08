@@ -324,8 +324,8 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
     _c1p1.phase = _FIX_18_16(p->payload[14]);
     _c1p1.ampl  = p->payload[15];
 
-    _bld_data.time0 = (0.5 * (_c0p0.phase + _c0p1.phase) - _ref.phase) / (2852. * 1.E+6);
-    _bld_data.time1 = (0.5 * (_c1p0.phase + _c1p1.phase) - _ref.phase) / (2852. * 1.E+6);
+    _bld_data.time0 = (0.5 * (_c0p0.phase + _c0p1.phase) - _ref.phase) * 1.E+6 / 2852.;
+    _bld_data.time1 = (0.5 * (_c1p0.phase + _c1p1.phase) - _ref.phase) * 1.E+6 / 2852.;
     _bld_data.charge0 = 0.5 * (_c0p0.ampl + _c0p1.ampl);
     _bld_data.charge1 = 0.5 * (_c1p0.ampl + _c1p1.ampl);
 
