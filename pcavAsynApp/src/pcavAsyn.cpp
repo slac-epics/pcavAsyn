@@ -306,7 +306,7 @@ void pcavAsynDriver::pollStream(void)
         _SWAP_TIMESTAMP(&(p->time));
         setTimeStamp(&(p->time));
 
-        if(p->chn_mask == 0xffff) {
+        if(p->chn_mask == 0xffff && p->payload[16]) {
             calcBldData(p);
             sendBldPacket(p);
             pushBsaValues(p);
