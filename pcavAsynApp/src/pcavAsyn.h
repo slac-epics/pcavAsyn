@@ -19,6 +19,9 @@
 #include <fstream>
 
 
+#include "BsaApi.h"
+
+
 #define NUM_CAV         2       // number of cavities
 #define NUM_PROBE       2       // number of probes per cavity 
 #define MAX_BSSS_BUF   36
@@ -66,7 +69,7 @@ typedef struct {
 class pcavAsynDriver
     :asynPortDriver {
     public:
-        pcavAsynDriver(void *pDrv, const char *portName, const char *pathString, const char *bsaStream, const char *named_root = NULL);
+        pcavAsynDriver(void *pDrv, const char *portName, const char *pathString, const char *bsaStream, const char *bsaPrefix,  const char *named_root = NULL);
         ~pcavAsynDriver();
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
@@ -76,20 +79,22 @@ class pcavAsynDriver
         void pollStream(void);
         void calcBldData(bsss_packet_t *p);
         void sendBldPacket(bsss_packet_t *p);
+        void pushBsaValues(bsss_packet_t *p);
         void updateFastPVs(void);
 
     private:
-        void    *pDrv;
-        char    *port;
-        char    *path;
-        char    *stream;
-        pcavFw  _pcav;
+        void        *pDrv;
+        const char  *port;
+        const char  *path;
+        const char  *stream;
+        const char  *bsa_name;
+        pcavFw      _pcav;
         dacSigGenFw _dacSigGen;
-        Stream  _bstream;
-        int32_t version;
-        uint32_t pollCnt;
-        uint32_t streamPollCnt;
-        uint32_t stream_read_size;
+        Stream      _bstream;
+        int32_t     version;
+        uint32_t    pollCnt;
+        uint32_t    streamPollCnt;
+        uint32_t    stream_read_size;
 
         int             current_bsss;
         bsss_packet_t   bsss_buf[MAX_BSSS_BUF];
@@ -110,9 +115,14 @@ class pcavAsynDriver
            double a;
            double b;
        } _coeff_time[NUM_CAV], _coeff_charge[NUM_CAV];
+
+
+       BsaChannel BsaChn_time[NUM_CAV];
+       BsaChannel BsaChn_charge[NUM_CAV];
         
 
         void ParameterSetup(void);
+        void bsaSetup(void);
         void monitor(void);
 
 
@@ -240,6 +250,10 @@ class pcavAsynDriver
 #define Q_BASEBAND_STR            "q_baseband_wf"         // baseband q waveform, length 4096
 
 #define RAW_PARAM_STR             "%sRaw"
+
+// BSA name
+#define BSA_TIME_STR              "%s:TIME%d"             // bsa name for time measurement
+#define BSA_CHARGE_STR            "%s:CHRG%d"             // bsa name for charge measurement
 
 
 

@@ -52,6 +52,7 @@ typedef struct {
     char            *port;
     char            *regPath;
     char            *bsaStream;
+    char            *bsaPrefix;
     pcavAsynDriver  *pcavAsyn;
     void            *prv;
 } pDrvList_t;
@@ -94,7 +95,7 @@ static pDrvList_t *find_drvByNamedRoot(const char *named_root)
 }
 
 
-pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pathString, const char *bsaStream, const char *named_root)
+pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pathString, const char *bsaStream, const char *bsaPrefix, const char *named_root)
     : asynPortDriver(portName,
                      1, /* number of elements of this device */
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
@@ -112,6 +113,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     port = epicsStrDup(portName);
     path = epicsStrDup(pathString);
     stream = (bsaStream && strlen(bsaStream))?epicsStrDup(bsaStream): NULL;
+    bsa_name = (bsaPrefix && strlen(bsaPrefix))? epicsStrDup(bsaPrefix): "default_bsa";
     this->pDrv = pDrv;
     pollCnt = 0;
     streamPollCnt = 0;
@@ -135,6 +137,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     }
 
     ParameterSetup();
+    bsaSetup();
 
 }
 
@@ -274,7 +277,7 @@ void pcavAsynDriver::report(int interest)
     printf("\t          timestamp          : %s\n",    ts_str);
     printf("\t          pulse id           : %lu\n",   (bsss_buf + current_bsss)->pulse_id);
     printf("\t          channel mask       : %8.8x\n", (bsss_buf + current_bsss)->chn_mask);
-    printf("\t          service mask       : %8.8x\n", (bsss_buf + current_bsss)->srv_mask);
+    printf("\t          severity mask      : %8.8x\n", (bsss_buf + current_bsss)->srv_mask);
 
     for(int i = 0; i < 32; i++) {
         if((bsss_buf + current_bsss)->chn_mask & u) t++;
@@ -306,9 +309,12 @@ void pcavAsynDriver::pollStream(void)
         if(p->chn_mask == 0xffff) {
             calcBldData(p);
             sendBldPacket(p);
+            pushBsaValues(p);
             updateFastPVs();
         }
     }
+
+
 }
 
 
@@ -334,6 +340,14 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
     _bld_data.charge0 = _coeff_charge[0].a * _bld_data.charge0 + _coeff_charge[0].b;
     _bld_data.charge1 = _coeff_charge[1].a * _bld_data.charge1 + _coeff_charge[1].b;
 
+}
+
+void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
+{
+    BSA_StoreData(BsaChn_time[0], p->time, _bld_data.time0, 0, 0);
+    BSA_StoreData(BsaChn_time[1], p->time, _bld_data.time1, 0, 0);
+    BSA_StoreData(BsaChn_charge[0], p->time, _bld_data.charge0, 0, 0);
+    BSA_StoreData(BsaChn_charge[1], p->time, _bld_data.charge1, 0, 0);
 }
 
 
@@ -456,6 +470,18 @@ void pcavAsynDriver::ParameterSetup(void)
     
 }
 
+void pcavAsynDriver::bsaSetup(void)
+{
+    char param_name[120];
+
+    BSA_ConfigSetAllPriorites(90);
+
+    for(int i = 0; i < NUM_CAV; i++) {
+        sprintf(param_name, BSA_TIME_STR,   bsa_name, i);  BsaChn_time[i]   = BSA_CreateChannel(param_name);
+        sprintf(param_name, BSA_CHARGE_STR, bsa_name, i);  BsaChn_charge[i] = BSA_CreateChannel(param_name);
+    }
+}
+
 
 void pcavAsynDriver::monitor(void)
 {
@@ -494,7 +520,7 @@ void pcavAsynDriver::monitor(void)
 
 extern "C" {
 
-int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *named_root)
+int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root)
 {
     init_drvList();
 
@@ -509,7 +535,13 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
     p->port       = epicsStrDup(portName);
     p->regPath    = epicsStrDup(regPathString);
     p->bsaStream  = (bsaStream && strlen(bsaStream))? epicsStrDup(bsaStream): NULL;
-    p->pcavAsyn   = new pcavAsynDriver((void *) p, (const char *) p->port, (const char *) p->regPath, (const char *) p->bsaStream, (const char *) p->named_root);
+    p->bsaPrefix  = (bsaPrefix && strlen(bsaPrefix))? epicsStrDup(bsaPrefix): NULL;
+    p->pcavAsyn   = new pcavAsynDriver((void *) p, 
+                                       (const char *) p->port, 
+                                       (const char *) p->regPath, 
+                                       (const char *) p->bsaStream, 
+                                       (const char *) p->bsaPrefix, 
+                                       (const char *) p->named_root);
     p->prv        = NULL;
 
     ellAdd(pDrvEllList, &p->node);
@@ -522,18 +554,21 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
 static const iocshArg initArg0 = {"port name",     iocshArgString};
 static const iocshArg initArg1 = {"register path", iocshArgString};
 static const iocshArg initArg2 = {"bsa stream",    iocshArgString};
-static const iocshArg initArg3 = {"named_root",    iocshArgString};
+static const iocshArg initArg3 = {"bsa prefix",    iocshArgString};
+static const iocshArg initArg4 = {"named_root",    iocshArgString};
 static const iocshArg * const initArgs[] = { &initArg0,
                                              &initArg1,
                                              &initArg2,
-                                             &initArg3 };
-static const iocshFuncDef initFuncDef = {"pcavAsynDriverConfigure", 4, initArgs};
+                                             &initArg3,
+                                             &initArg4 };
+static const iocshFuncDef initFuncDef = {"pcavAsynDriverConfigure", 5, initArgs};
 static void  initCallFunc(const iocshArgBuf *args)
 {
     pcavAsynDriverConfigure(args[0].sval,
                             args[1].sval,
                             (args[2].sval && strlen(args[2].sval))? args[2].sval: NULL,
-                            (args[3].sval && strlen(args[3].sval))? args[3].sval: NULL);
+                            (args[3].sval && strlen(args[3].sval))? args[3].sval: NULL,
+                            (args[4].sval && strlen(args[4].sval))? args[4].sval: NULL);
 }
 
 static void pcavAsynDriverRegister(void)

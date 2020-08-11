@@ -27,3 +27,14 @@ file bld.db
             {  "$(DEV)",       0,  "1 second" }
             {  "$(DEV)",       1,  "1 second" }
 }
+
+
+file Bsa.db
+{
+  pattern {  DEVICE      ,  ATRB       , LNK      ,  EGU     ,  HOPR,  LOPR  }
+          { "$(DEV)"  ,    "TIME0"     , ""       , "ps"     ,    "",    ""  }
+          { "$(DEV)"  ,    "TIME1"     , ""       , "ps"     ,    "",    ""  }
+          { "$(DEV)"  ,    "CHRG0"     , ""       , "pC"     ,    "",    ""  }
+          { "$(DEV)"  ,    "CHRG1"     , ""       , "pC"     ,    "",    ""  }
+}
+
