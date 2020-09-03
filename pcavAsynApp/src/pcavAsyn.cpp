@@ -178,6 +178,12 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             }
         }
     }
+
+    for(int i = 0; i < NUM_WFDATA; i++) {
+        if(function == p_wfDataSel[i]) {
+            _pcav->setWfDataSel(i, (uint32_t) value); goto _escape;
+        }
+    }
     
     _escape:
 
@@ -406,6 +412,10 @@ void pcavAsynDriver::ParameterSetup(void)
     sprintf(raw_param_name, RAW_PARAM_STR, param_name); createParam(raw_param_name, asynParamInt32,   &(p_rfRefQ.raw));
     // rf reference control
     sprintf(param_name,     RFREF_SEL_STR);             createParam(param_name,     asynParamInt32,   &p_rfRefSel);
+
+    for(int i = 0; i < NUM_WFDATA; i++) {
+        sprintf(param_name, WFDATA_SEL_STR, i);             createParam(param_name,     asynParamInt32,   &(p_wfDataSel[i]));
+    }
 
 
 

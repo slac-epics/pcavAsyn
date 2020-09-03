@@ -1,3 +1,9 @@
+file wfDataSel.db
+{
+    pattern {  DEVICE  }
+            { "$(DEV)" }
+}
+
 file rfRef.db
 {
     pattern  { DEVICE,   NELM_BB }

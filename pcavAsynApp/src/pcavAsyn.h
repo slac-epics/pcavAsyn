@@ -26,6 +26,9 @@
 #define NUM_PROBE       2       // number of probes per cavity 
 #define MAX_BSSS_BUF   36
 
+
+#define NUM_WFDATA      8
+
 typedef struct {
     int raw;
     int val;
@@ -139,6 +142,8 @@ class pcavAsynDriver
         pcavMon p_rfRefQ;
         int     p_rfRefSel;
 
+        int     p_wfDataSel[NUM_WFDATA];
+
 
         // 2 cavities, 2 probes
         pcavMon p_cavIfAmpl[NUM_CAV][NUM_PROBE];
@@ -205,6 +210,8 @@ class pcavAsynDriver
 #define RFREF_I_STR               "rfRefI"
 #define RFREF_Q_STR               "rfRefQ"
 #define RFREF_SEL_STR             "rfRefSel"
+
+#define WFDATA_SEL_STR            "wfDataSel%d"
 
 
 /*2 cavties and 2 probes */

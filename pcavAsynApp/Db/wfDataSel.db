@@ -1,0 +1,148 @@
+#
+#  waveform data selectors
+
+record(mbbi, "$(DEVICE):WFDATASEL0")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 0")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData0Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(ZRST, "Cav0 NCO")
+    field(ONST, "Cav1 NCO")
+    info(autosaveFields, "VAL")
+}
+
+
+record(mbbi, "$(DEVICE):WFDATASEL1")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData1Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "Cav0 P0 DC Real")
+    field(ONST, "Cav0 P0 DC Image")
+    field(TWST, "Cav0 P1 DC Real")
+    field(THST, "Cav0 P1 DC Image")
+    info(autosaveFields, "VAL")
+}
+
+
+record(mbbi, "$(DEVICE):WFDATASEL2")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 2")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData2Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "Cav1 P0 DC Real")
+    field(ONST, "Cav1 P0 DC Image")
+    field(TWST, "Cav1 P1 DC Real")
+    field(THST, "Cav1 P1 DC Image")
+    info(autosaveFields, "VAL")
+}
+
+
+record(mbbi, "$(DEVICE):WFDATASEL3")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 3")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData3Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "Cav0 Freq Phase")
+    field(ONST, "Cav0 Freq Phase Windowed")
+    field(TWST, "Cav1 Freq Phase")
+    field(THST, "Cav1 Freq Phase Windowed")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "$(DEVICE):WFDATASEL4")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 4")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData4Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "Cav0 P1 PT Window")
+    field(ONST, "Cav1 P1 PT Window")
+    field(TWST, "FLO Cav0 Window")
+    field(THST, "FLO Cav1 Window")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "$(DEVICE):WFDATASEL5")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 5")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData5Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(ZRST, "RF Ref I")
+    field(ONST, "RF REf Q")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "$(DEVICE):WFDATASEL6")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 6")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData6Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(ZRST, "Cav0 PT Control")
+    field(ONST, "Cav1 PT Control")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "$(DEVICE):WFDATASEL7")
+{
+    field(PINI, "YES")
+    field(DESC, "Waveform Data Selector 7")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) wfData7Sel")
+    field(SCAN, "Passive")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(FVVL, "5")
+    field(SXVL, "6")
+    field(SVVL, "7")
+    field(ZRST, "Cav0 P0 Window Real")
+    field(ONST, "Cav0 P0 Window Image")
+    field(TWST, "Cav0 P1 Window Real")
+    field(THST, "Cav0 P1 Window Image")
+    field(FRST, "Cav1 P0 Window Real")
+    field(FVST, "Cav1 P0 Window Image")
+    field(SXST, "Cav1 P1 Window Real")
+    field(SVST, "Cav1 P1 Window Image")
+    info(autosaveFields, "VAL")
+}
+
+
+#
