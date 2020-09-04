@@ -1,12 +1,12 @@
 #
 #  waveform data selectors
 
-record(mbbi, "$(DEVICE):WFDATASEL0")
+record(mbbo, "$(DEVICE):WFDATASEL0")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 0")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData0Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel0")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -16,12 +16,12 @@ record(mbbi, "$(DEVICE):WFDATASEL0")
 }
 
 
-record(mbbi, "$(DEVICE):WFDATASEL1")
+record(mbbo, "$(DEVICE):WFDATASEL1")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 1")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData1Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel1")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -35,12 +35,12 @@ record(mbbi, "$(DEVICE):WFDATASEL1")
 }
 
 
-record(mbbi, "$(DEVICE):WFDATASEL2")
+record(mbbo, "$(DEVICE):WFDATASEL2")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 2")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData2Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel2")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -54,12 +54,12 @@ record(mbbi, "$(DEVICE):WFDATASEL2")
 }
 
 
-record(mbbi, "$(DEVICE):WFDATASEL3")
+record(mbbo, "$(DEVICE):WFDATASEL3")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 3")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData3Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel3")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -72,12 +72,12 @@ record(mbbi, "$(DEVICE):WFDATASEL3")
     info(autosaveFields, "VAL")
 }
 
-record(mbbi, "$(DEVICE):WFDATASEL4")
+record(mbbo, "$(DEVICE):WFDATASEL4")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 4")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData4Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel4")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -90,12 +90,12 @@ record(mbbi, "$(DEVICE):WFDATASEL4")
     info(autosaveFields, "VAL")
 }
 
-record(mbbi, "$(DEVICE):WFDATASEL5")
+record(mbbo, "$(DEVICE):WFDATASEL5")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 5")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData5Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel5")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -104,12 +104,12 @@ record(mbbi, "$(DEVICE):WFDATASEL5")
     info(autosaveFields, "VAL")
 }
 
-record(mbbi, "$(DEVICE):WFDATASEL6")
+record(mbbo, "$(DEVICE):WFDATASEL6")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 6")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData6Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel6")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
@@ -118,12 +118,12 @@ record(mbbi, "$(DEVICE):WFDATASEL6")
     info(autosaveFields, "VAL")
 }
 
-record(mbbi, "$(DEVICE):WFDATASEL7")
+record(mbbo, "$(DEVICE):WFDATASEL7")
 {
     field(PINI, "YES")
     field(DESC, "Waveform Data Selector 7")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT),0) wfData7Sel")
+    field(OUT,  "@asyn($(PORT),0) wfDataSel7")
     field(SCAN, "Passive")
     field(ZRVL, "0")
     field(ONVL, "1")
