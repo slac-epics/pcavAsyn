@@ -1,4 +1,5 @@
 R1.3.0      09-03-2020    Kukhee Kim (khkim)
+                        - build with pcavLib API R1.1.0
                         - add waveform data selector
 
 R1.2.0      08-10-2020    Kukhee Kim (khkim)
