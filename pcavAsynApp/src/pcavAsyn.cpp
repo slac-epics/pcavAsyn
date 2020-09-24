@@ -136,6 +136,15 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
         _coeff_time[i].b = _coeff_charge[i].b = 0.;
     }
 
+    _bld_data = { 0., 0., 0., 0., 
+                 true,
+                  0, 0, 0, 0,
+                  0., 0., 0.004, 0.004,
+                  0., 0., 0., 0.,
+                  0., 0., 0., 0.,
+                  0., 0., 0., 0 };
+
+
     ParameterSetup();
     bsaSetup();
 
@@ -153,6 +162,8 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     status = (asynStatus) setIntegerParam(function, value);
 
+    if(function == p_reset)  _bld_data.reset = true;
+    else
     if(function == p_rfRefSel)                 _pcav->setRefSel((uint32_t) value);
     else
 
@@ -217,6 +228,28 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
         }
         if(function == p_coeff_charge[i].b) {
             _coeff_charge[i].b = value;   goto _escape;
+        }
+        if(function == p_result[i].threshold) {
+            switch(i) {
+                case 0:
+                    _bld_data.thresholdChrg0 = value;
+                    break;
+                case 1:
+                    _bld_data.thresholdChrg1 = value;
+                    break;
+            }
+            goto _escape;
+        }
+        if(function == p_result[i].var_gain) {
+            switch(i) {
+                case 0:
+                    _bld_data.var_gain0 = value;
+                    break;
+                case 1:
+                    _bld_data.var_gain1 = value;
+                    break;
+            }
+            goto _escape;
         }
 
         for(int j = 0; j < NUM_PROBE; j++) {
@@ -346,7 +379,53 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
     _bld_data.charge0 = _coeff_charge[0].a * _bld_data.charge0 + _coeff_charge[0].b;
     _bld_data.charge1 = _coeff_charge[1].a * _bld_data.charge1 + _coeff_charge[1].b;
 
+
+
+#define  VAR_CALC(MEAS,GAIN,MEAN,VAR) \
+{ \
+    double v, v2; \
+    if(isnan(MEAN) || isinf(MEAN)) (MEAN) = 0.; \
+    if(isnan(VAR)  || isinf(VAR))  (VAR)  = 0.; \
+    v = (MEAS) - (MEAN); \
+    (MEAN) += (GAIN) * v; \
+    v = (MEAS) - (MEAN); \
+    v2 = v * v; \
+    (VAR) += (GAIN) * (v2 - (VAR)); \
 }
+
+
+    if(_bld_data.reset) {
+        _bld_data.reset = false;
+        // post counters  before reset
+        setIntegerParam(p_result[0].validCnt, _bld_data.validCnt0);
+        setIntegerParam(p_result[1].validCnt, _bld_data.validCnt1);
+        setIntegerParam(p_result[0].invalidCnt, _bld_data.invalidCnt0);
+        setIntegerParam(p_result[1].invalidCnt, _bld_data.invalidCnt1);
+
+        _bld_data.validCnt0   = _bld_data.validCnt1   = 0;  // reset valid counter
+        _bld_data.invalidCnt0 = _bld_data.invalidCnt1 = 0;  // reset invalid counter
+    }
+
+    if(_bld_data.charge0 >= _bld_data.thresholdChrg0) {
+        _bld_data.validCnt0++;
+        VAR_CALC(_bld_data.time0,   _bld_data.var_gain0, _bld_data.avg_time0,   _bld_data.var_time0);
+        VAR_CALC(_bld_data.charge0, _bld_data.var_gain0, _bld_data.avg_charge0, _bld_data.var_charge0);
+        _bld_data.rms_time0   = sqrt(_bld_data.var_time0);
+        _bld_data.rms_charge0 = sqrt(_bld_data.var_charge0);
+
+    } else _bld_data.invalidCnt0++;
+
+    if(_bld_data.charge1 >= _bld_data.thresholdChrg1) {
+        _bld_data.validCnt1++;
+        VAR_CALC(_bld_data.time1,   _bld_data.var_gain1, _bld_data.avg_time1,   _bld_data.var_time1);
+        VAR_CALC(_bld_data.charge1, _bld_data.var_gain1, _bld_data.avg_charge1, _bld_data.var_charge1);
+    } else _bld_data.invalidCnt1++;
+
+
+
+}
+
+
 
 void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
 {
@@ -360,10 +439,21 @@ void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
 void pcavAsynDriver::updateFastPVs(void)
 {
 
-    setDoubleParam(p_result[0].time, _bld_data.time0);
-    setDoubleParam(p_result[1].time, _bld_data.time1);
-    setDoubleParam(p_result[0].charge, _bld_data.charge0);
-    setDoubleParam(p_result[1].charge, _bld_data.charge1);
+    setDoubleParam(p_result[0].avg_time, _bld_data.avg_time0);
+    setDoubleParam(p_result[1].avg_time, _bld_data.avg_time1);
+    setDoubleParam(p_result[0].avg_charge, _bld_data.avg_charge0);
+    setDoubleParam(p_result[1].avg_charge, _bld_data.avg_charge1);
+
+    setDoubleParam(p_result[0].rms_time, _bld_data.rms_time0);
+    setDoubleParam(p_result[1].rms_time, _bld_data.rms_time1);
+    setDoubleParam(p_result[0].rms_charge, _bld_data.rms_charge0);
+    setDoubleParam(p_result[1].rms_charge, _bld_data.rms_charge1);
+
+    setDoubleParam(p_result[0].raw_time, _bld_data.time0);
+    setDoubleParam(p_result[1].raw_time, _bld_data.time1);
+    setDoubleParam(p_result[0].raw_charge, _bld_data.charge0);
+    setDoubleParam(p_result[1].raw_charge, _bld_data.charge1);
+
 
     callParamCallbacks();
 }
@@ -470,10 +560,21 @@ void pcavAsynDriver::ParameterSetup(void)
         sprintf(param_name, COEFF_CHARGE_A_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_coeff_charge[cav].a));
         sprintf(param_name, COEFF_CHARGE_B_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_coeff_charge[cav].b));
         // time and charge
-        sprintf(param_name, TIME_STR, cav);              createParam(param_name, asynParamFloat64,  &(p_result[cav].time));
-        sprintf(param_name, CHARGE_STR, cav);            createParam(param_name, asynParamFloat64,  &(p_result[cav].charge));
+        sprintf(param_name, TIME_STR, cav);              createParam(param_name, asynParamFloat64,  &(p_result[cav].avg_time));
+        sprintf(param_name, CHARGE_STR, cav);            createParam(param_name, asynParamFloat64,  &(p_result[cav].avg_charge));
+        sprintf(param_name, RAW_TIME_STR, cav);          createParam(param_name, asynParamFloat64,  &(p_result[cav].raw_time));
+        sprintf(param_name, RAW_CHARGE_STR, cav);        createParam(param_name, asynParamFloat64,  &(p_result[cav].raw_charge));
+        sprintf(param_name, RMS_TIME_STR, cav);          createParam(param_name, asynParamFloat64,  &(p_result[cav].rms_time));
+        sprintf(param_name, RMS_CHARGE_STR, cav);        createParam(param_name, asynParamFloat64,  &(p_result[cav].rms_charge));
+
+        sprintf(param_name, VALID_CNT_STR, cav);         createParam(param_name, asynParamInt32,    &(p_result[cav].validCnt));
+        sprintf(param_name, INVALID_CNT_STR, cav);       createParam(param_name, asynParamInt32,    &(p_result[cav].invalidCnt));
+        sprintf(param_name, THRESHOLD_CHRG_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_result[cav].threshold));
+        sprintf(param_name, VAR_GAIN_STR, cav);          createParam(param_name, asynParamFloat64,  &(p_result[cav].var_gain));
+
     }
 
+    sprintf(param_name, RESET_STR);      createParam(param_name, asynParamInt32,        &(p_reset));
     // DacSigGen, baseline I&Q waveforms
     sprintf(param_name, I_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(i_baseband_wf));
     sprintf(param_name, Q_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(q_baseband_wf));

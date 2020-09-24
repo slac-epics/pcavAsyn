@@ -1,4 +1,18 @@
 #
+#    reset /* internal use, NOT an user interface */
+#
+
+record(longout, "$(DEVICE):RSTCNT")
+{
+    field(DESC, "Reset Counter Internal Use")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) reset")
+    field(SCAN, "1 second")
+    field(OMSL, "supervisory")
+    field(VAL,  "1")
+}
+
+#
 #   baseband I & Q waveform
 #
 

@@ -112,6 +112,35 @@ class pcavAsynDriver
             double time1;
             double charge0;
             double charge1;
+
+            bool      reset;   /* reset every 1 second */
+            int       validCnt0;
+            int       validCnt1;
+            int       invalidCnt0;
+            int       invalidCnt1;
+
+            double    thresholdChrg0;
+            double    thresholdChrg1;
+            double    var_gain0;
+            double    var_gain1;
+
+            double    avg_time0;
+            double    avg_time1;
+
+            double    avg_charge0;
+            double    avg_charge1;
+
+            double    var_time0;
+            double    var_time1;
+
+            double    var_charge0;
+            double    var_charge1;
+
+            double    rms_time0;
+            double    rms_time1;
+
+            double    rms_charge0;
+            double    rms_charge1;
         } _bld_data;
 
        struct {
@@ -180,13 +209,24 @@ class pcavAsynDriver
         } p_coeff_time[NUM_CAV], p_coeff_charge[NUM_CAV];
 
         struct {
-            int time;
-            int charge;
+            int raw_time;
+            int raw_charge;
+            int avg_time;
+            int avg_charge;
+            int rms_time;
+            int rms_charge;
+            int validCnt;
+            int invalidCnt;
+            int threshold;
+            int var_gain;
         } p_result[NUM_CAV];
+
+        int p_reset;
 
         // DacSigGen, baseline I&Q
         int i_baseband_wf;
         int q_baseband_wf;
+
 
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
         int lastPcavParam;
@@ -248,9 +288,20 @@ class pcavAsynDriver
 #define COEFF_TIME_B_STR         "coeffBTime%d"
 #define COEFF_CHARGE_A_STR       "coeffACharge%d"
 #define COEFF_CHARGE_B_STR       "coeffBCharge%d"
+
 #define TIME_STR                 "time%d"
 #define CHARGE_STR               "charge%d"
+#define RAW_TIME_STR             "raw_time%d"
+#define RAW_CHARGE_STR           "raw_charge%d"
+#define RMS_TIME_STR             "rms_time%d"
+#define RMS_CHARGE_STR           "rms_charge%d"
 
+#define VALID_CNT_STR            "validCnt%d"
+#define INVALID_CNT_STR          "invalidCnt%d"
+
+#define THRESHOLD_CHRG_STR       "thresholdChrg%d"
+#define VAR_GAIN_STR             "var_gain%d"
+#define RESET_STR                "reset"
 
 /* bandband I & Q waveforms */
 #define I_BASEBAND_STR            "i_baseband_wf"         // baseband i waveform, length 4096

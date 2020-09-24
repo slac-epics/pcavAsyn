@@ -48,8 +48,58 @@ record(ao, "$(DEVICE):COEFFB_CHRG$(CAV)")
 
 
 
+# valid counter and invalid counter
+
+record(longin, "$(DEVICE):VALIDCNT$(CAV)")
+{
+    field(DESC, "Valid Counter for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) validCnt$(CAV)")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(longin, "$(DEVICE):INVALIDCNT$(CAV)")
+{
+    field(DESC, "Invalid Counter for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) invalidCnt$(CAV)")
+    field(SCAN, "I/O Intr")
+}
+
+
+
+# Var Gain
+
+record(ao, "$(DEVICE):VARGAIN$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Gain for RMS Calculation for CAV$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) var_gain$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(VAL,  "0.004")
+    info(autosaveFields, "VAL")
+}
+
+# charge threshold
+
+record(ao, "$(DEVICE):THREDCHRG$(CAV)")
+{
+    field(PINI, "YES")
+    field(DESC, "Charge Threshold for CAV$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) thresholdChrg$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+
+
+
 #
-#
+#  average
 #
 
 record(ai, "$(DEVICE):FAST_TIME$(CAV)")
@@ -116,4 +166,147 @@ record(ai, "$(DEVICE):CHRG$(CAV)")
     field(LLSV, "MAJOR")
     info(autosaveFields, "LOLO LOW HIGH HIHI")
 }
+
+
+
+#
+#    rms
+#
+
+record(ai, "$(DEVICE):FAST_RMSTIME$(CAV)")
+{
+    field(DESC, "RMS Arrival Time for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rms_time$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):RMSTIME$(CAV)")
+{
+    field(DESC, "RMS Arrival Time for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_RMSTIME$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSEL, "$(DEVICE):FAST_RMSTIME$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+
+record(ai, "$(DEVICE):FAST_RMSCHRG$(CAV)")
+{
+    field(DESC, "RMS Charge for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) rms_charge$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):RMSCHRG$(CAV)")
+{
+    field(DESC, "RMS Charge for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_RMSCHRG$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSEL, "$(DEVICE):FAST_RMSCHRG$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+
+#
+#    raw
+#
+
+record(ai, "$(DEVICE):FAST_RAWTIME$(CAV)")
+{
+    field(DESC, "Raw Arrival Time for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) raw_time$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):RAWTIME$(CAV)")
+{
+    field(DESC, "Raw Arrival Time for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_RAWTIME$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "PS")
+    field(TSEL, "$(DEVICE):FAST_RAWTIME$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+
+record(ai, "$(DEVICE):FAST_RAWCHRG$(CAV)")
+{
+    field(DESC, "Raw Charge for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) raw_charge$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSE,  "-2")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+
+record(ai, "$(DEVICE):RAWCHRG$(CAV)")
+{
+    field(DESC, "Raw Charge for Cav$(CAV)")
+    field(INP,  "$(DEVICE):FAST_RAWCHRG$(CAV)")
+    field(SCAN, "$(SCAN)")
+    field(PREC, "3")
+    field(EGU,  "pC")
+    field(TSEL, "$(DEVICE):FAST_RAWCHRG$(CAV).TIME")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
 
