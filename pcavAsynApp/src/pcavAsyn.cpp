@@ -136,8 +136,8 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
         _coeff_time[i].b = _coeff_charge[i].b = 0.;
     }
 
-    _bld_data = { 0., 0., 0., 0., 
-                 true,
+    _bld_data = { 0., 0., 0., 0. };
+    _st_data  = { true,
                   0, 0, 0, 0,
                   0., 0., 0.004, 0.004,
                   0., 0., 0., 0.,
@@ -162,7 +162,7 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     status = (asynStatus) setIntegerParam(function, value);
 
-    if(function == p_reset)  _bld_data.reset = true;
+    if(function == p_reset)  _st_data.reset = true;
     else
     if(function == p_rfRefSel)                 _pcav->setRefSel((uint32_t) value);
     else
@@ -232,10 +232,10 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
         if(function == p_result[i].threshold) {
             switch(i) {
                 case 0:
-                    _bld_data.thresholdChrg0 = value;
+                    _st_data.thresholdChrg0 = value;
                     break;
                 case 1:
-                    _bld_data.thresholdChrg1 = value;
+                    _st_data.thresholdChrg1 = value;
                     break;
             }
             goto _escape;
@@ -243,10 +243,10 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
         if(function == p_result[i].var_gain) {
             switch(i) {
                 case 0:
-                    _bld_data.var_gain0 = value;
+                    _st_data.var_gain0 = value;
                     break;
                 case 1:
-                    _bld_data.var_gain1 = value;
+                    _st_data.var_gain1 = value;
                     break;
             }
             goto _escape;
@@ -394,32 +394,32 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 }
 
 
-    if(_bld_data.reset) {
-        _bld_data.reset = false;
+    if(_st_data.reset) {
+        _st_data.reset = false;
         // post counters  before reset
-        setIntegerParam(p_result[0].validCnt, _bld_data.validCnt0);
-        setIntegerParam(p_result[1].validCnt, _bld_data.validCnt1);
-        setIntegerParam(p_result[0].invalidCnt, _bld_data.invalidCnt0);
-        setIntegerParam(p_result[1].invalidCnt, _bld_data.invalidCnt1);
+        setIntegerParam(p_result[0].validCnt, _st_data.validCnt0);
+        setIntegerParam(p_result[1].validCnt, _st_data.validCnt1);
+        setIntegerParam(p_result[0].invalidCnt, _st_data.invalidCnt0);
+        setIntegerParam(p_result[1].invalidCnt, _st_data.invalidCnt1);
 
-        _bld_data.validCnt0   = _bld_data.validCnt1   = 0;  // reset valid counter
-        _bld_data.invalidCnt0 = _bld_data.invalidCnt1 = 0;  // reset invalid counter
+        _st_data.validCnt0   = _st_data.validCnt1   = 0;  // reset valid counter
+        _st_data.invalidCnt0 = _st_data.invalidCnt1 = 0;  // reset invalid counter
     }
 
-    if(_bld_data.charge0 >= _bld_data.thresholdChrg0) {
-        _bld_data.validCnt0++;
-        VAR_CALC(_bld_data.time0,   _bld_data.var_gain0, _bld_data.avg_time0,   _bld_data.var_time0);
-        VAR_CALC(_bld_data.charge0, _bld_data.var_gain0, _bld_data.avg_charge0, _bld_data.var_charge0);
-        _bld_data.rms_time0   = sqrt(_bld_data.var_time0);
-        _bld_data.rms_charge0 = sqrt(_bld_data.var_charge0);
+    if(_bld_data.charge0 >= _st_data.thresholdChrg0) {
+        _st_data.validCnt0++;
+        VAR_CALC(_bld_data.time0,   _st_data.var_gain0, _st_data.avg_time0,   _st_data.var_time0);
+        VAR_CALC(_bld_data.charge0, _st_data.var_gain0, _st_data.avg_charge0, _st_data.var_charge0);
+        _st_data.rms_time0   = sqrt(_st_data.var_time0);
+        _st_data.rms_charge0 = sqrt(_st_data.var_charge0);
 
-    } else _bld_data.invalidCnt0++;
+    } else _st_data.invalidCnt0++;
 
-    if(_bld_data.charge1 >= _bld_data.thresholdChrg1) {
-        _bld_data.validCnt1++;
-        VAR_CALC(_bld_data.time1,   _bld_data.var_gain1, _bld_data.avg_time1,   _bld_data.var_time1);
-        VAR_CALC(_bld_data.charge1, _bld_data.var_gain1, _bld_data.avg_charge1, _bld_data.var_charge1);
-    } else _bld_data.invalidCnt1++;
+    if(_bld_data.charge1 >= _st_data.thresholdChrg1) {
+        _st_data.validCnt1++;
+        VAR_CALC(_bld_data.time1,   _st_data.var_gain1, _st_data.avg_time1,   _st_data.var_time1);
+        VAR_CALC(_bld_data.charge1, _st_data.var_gain1, _st_data.avg_charge1, _st_data.var_charge1);
+    } else _st_data.invalidCnt1++;
 
 
 
@@ -439,15 +439,15 @@ void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
 void pcavAsynDriver::updateFastPVs(void)
 {
 
-    setDoubleParam(p_result[0].avg_time, _bld_data.avg_time0);
-    setDoubleParam(p_result[1].avg_time, _bld_data.avg_time1);
-    setDoubleParam(p_result[0].avg_charge, _bld_data.avg_charge0);
-    setDoubleParam(p_result[1].avg_charge, _bld_data.avg_charge1);
+    setDoubleParam(p_result[0].avg_time, _st_data.avg_time0);
+    setDoubleParam(p_result[1].avg_time, _st_data.avg_time1);
+    setDoubleParam(p_result[0].avg_charge, _st_data.avg_charge0);
+    setDoubleParam(p_result[1].avg_charge, _st_data.avg_charge1);
 
-    setDoubleParam(p_result[0].rms_time, _bld_data.rms_time0);
-    setDoubleParam(p_result[1].rms_time, _bld_data.rms_time1);
-    setDoubleParam(p_result[0].rms_charge, _bld_data.rms_charge0);
-    setDoubleParam(p_result[1].rms_charge, _bld_data.rms_charge1);
+    setDoubleParam(p_result[0].rms_time, _st_data.rms_time0);
+    setDoubleParam(p_result[1].rms_time, _st_data.rms_time1);
+    setDoubleParam(p_result[0].rms_charge, _st_data.rms_charge0);
+    setDoubleParam(p_result[1].rms_charge, _st_data.rms_charge1);
 
     setDoubleParam(p_result[0].raw_time, _bld_data.time0);
     setDoubleParam(p_result[1].raw_time, _bld_data.time1);

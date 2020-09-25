@@ -112,7 +112,9 @@ class pcavAsynDriver
             double time1;
             double charge0;
             double charge1;
+        } _bld_data;
 
+        struct {
             bool      reset;   /* reset every 1 second */
             int       validCnt0;
             int       validCnt1;
@@ -141,7 +143,7 @@ class pcavAsynDriver
 
             double    rms_charge0;
             double    rms_charge1;
-        } _bld_data;
+        } _st_data;
 
        struct {
            double a;
