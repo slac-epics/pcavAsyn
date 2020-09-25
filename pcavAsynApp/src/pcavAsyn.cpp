@@ -162,7 +162,20 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     status = (asynStatus) setIntegerParam(function, value);
 
-    if(function == p_reset)  _st_data.reset = true;
+    if(function == p_reset)  {
+        if(!_st_data.reset) _st_data.reset = true;   // claculation has worked, need to reset
+        else {  // caculation never worked after last reset, need to clear counter and need to post it.
+            if(_st_data.validCnt0 || _st_data.validCnt1 
+                 || _st_data.invalidCnt0 || _st_data.invalidCnt1) {
+                _st_data.validCnt0   = _st_data.validCnt1   = 0;  // reset valid counter
+                _st_data.invalidCnt0 = _st_data.invalidCnt1 = 0;  // reset invalid counter
+                setIntegerParam(p_result[0].validCnt, _st_data.validCnt0);
+                setIntegerParam(p_result[1].validCnt, _st_data.validCnt1);
+                setIntegerParam(p_result[0].invalidCnt, _st_data.invalidCnt0);
+                setIntegerParam(p_result[1].invalidCnt, _st_data.invalidCnt1);
+            }
+        }
+    }
     else
     if(function == p_rfRefSel)                 _pcav->setRefSel((uint32_t) value);
     else
