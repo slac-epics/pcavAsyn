@@ -25,6 +25,174 @@ record(longin, "$(DEVICE):CAV$(CAV)NCORAW")
 }
 
 
+record(ao, "$(DEVICE):CAV$(CAV)NCOPID_KP")
+{
+    field(PINI, "YES")
+    field(DESC, "KP of NCO PID for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) kp_nco_cav$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(PREC, "3")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):CAV$(CAV)NCOPID_KI")
+{
+    field(PINI, "YES")
+    field(DESC, "KI of NCO PID for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) ki_nco_cav$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(PREC, "3")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):CAV$(CAV)NCOPID_KD")
+{
+    field(PINI, "YES")
+    field(DESC, "KD of NCO PID for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) kd_nco_cav$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(PREC, "3")
+    info(autosaveFields, "VAL")
+}
+
+
+record(ao, "$(DEVICE):CAV$(CAV)NCOPID_VARGAIN")
+{
+    field(PINI, "YES")
+    field(DESC, "Var Gain NCO PID for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) var_gain_nco_cav$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(PREC, "3")
+    field(VAL,  "0.04")
+    info(autosaveFields, "VAL")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_AVGDCFREQ")
+{
+    field(DESC, "Avg DCFreq for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) avg_dcfreq_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_ERR")
+{
+    field(DESC, "Error for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) err_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_INTG")
+{
+    field(DESC, "Integral for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) intg_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_DERV")
+{
+    field(DESC, "Derivative for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) derv_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_BIAS")
+{
+    field(DESC, "Bias for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) bias_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ai, "$(DEVICE):CAV$(CAV)NCOPID_OUTPUT")
+{
+    field(DESC, "Output for NCO Ctrl for Cav$(CAV)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) output_nco_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(LSV,  "MINOR")
+    field(LLSV, "MAJOR")
+    field(FLNK, "$(DEVICE):CAV$(CAV)NCOPID_OUTPUTPUSH PP")
+    info(autosaveFields, "LOLO LOW HIGH HIHI")
+}
+
+record(ao, "$(DEVICE):CAV$(CAV)NCOPID_OUTPUTPUSH")
+{
+    field(DESC, "NCO PID output push for Cav$(CAV)")
+    field(DOL,  "$(DEVICE):CAV$(CAV)NCOPID_OUTPUT NPP NMS")
+    field(OUT,  "$(DEVICE):CAV0NCOPHASEADJ PP NMS")
+    field(SCAN, "Passive")
+    field(OMSL, "closed_loop")    
+}
+
+
+
+
+
+record(bo, "$(DEVICE):CAV$(CAV)NCOPID_ENABLE")
+{
+#    field(PINI, "YES")
+    field(DESC, "NCO PID Enable for Cav$(CAV)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) pid_enable_nco_cav$(CAV)")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+#    info(autosaveFields, "VAL")
+}
+
+
 
 #
 #

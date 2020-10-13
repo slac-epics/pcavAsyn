@@ -10,6 +10,7 @@ record(ao, "$(DEVICE):COEFFA_TIME$(CAV)")
     field(OUT,  "@asyn($(PORT),0) coeffATime$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     info(autosaveFields, "VAL")
 }
 
@@ -21,6 +22,7 @@ record(ao, "$(DEVICE):COEFFB_TIME$(CAV)")
     field(OUT,  "@asyn($(PORT),0) coeffBTime$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     info(autosaveFields, "VAL")
 }
 
@@ -32,6 +34,7 @@ record(ao, "$(DEVICE):COEFFA_CHRG$(CAV)")
     field(OUT,  "@asyn($(PORT),0) coeffACharge$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     info(autosaveFields, "VAL")
 }
 
@@ -43,6 +46,7 @@ record(ao, "$(DEVICE):COEFFB_CHRG$(CAV)")
     field(OUT,  "@asyn($(PORT),0) coeffBCharge$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     info(autosaveFields, "VAL")
 }
 
@@ -79,6 +83,7 @@ record(ao, "$(DEVICE):VARGAIN$(CAV)")
     field(OUT,  "@asyn($(PORT),0) var_gain$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     field(VAL,  "0.004")
     info(autosaveFields, "VAL")
 }
@@ -93,6 +98,7 @@ record(ao, "$(DEVICE):THREDCHRG$(CAV)")
     field(OUT,  "@asyn($(PORT),0) thresholdChrg$(CAV)")
     field(SCAN, "Passive")
     field(OMSL, "supervisory")
+    field(PREC, "3")
     info(autosaveFields, "VAL")
 }
 

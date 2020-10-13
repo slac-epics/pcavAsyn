@@ -64,8 +64,18 @@ typedef struct {
 
 
 
+#define  VAR_CALC(MEAS,GAIN,MEAN,VAR) \
+{ \
+    double v, v2; \
+    if(isnan(MEAN) || isinf(MEAN)) (MEAN) = 0.; \
+    if(isnan(VAR)  || isinf(VAR))  (VAR)  = 0.; \
+    v = (MEAS) - (MEAN); \
+    (MEAN) += (GAIN) * v; \
+    v = (MEAS) - (MEAN); \
+    v2 = v * v; \
+    (VAR) += (GAIN) * (v2 - (VAR)); \
+}
 
-//double phase = (p->payload[1] & 0x20000) ? (p->payload[1]-0x40000) : p->payload[1];
   
 
 
@@ -78,6 +88,7 @@ class pcavAsynDriver
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
         asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
         void report(int interest);
+        void fast_poll(void);
         void poll(void);
         void pollStream(void);
         void calcBldData(bsss_packet_t *p);
@@ -95,6 +106,7 @@ class pcavAsynDriver
         dacSigGenFw _dacSigGen;
         Stream      _bstream;
         int32_t     version;
+        uint32_t    fast_pollCnt;
         uint32_t    pollCnt;
         uint32_t    streamPollCnt;
         uint32_t    stream_read_size;
@@ -150,6 +162,42 @@ class pcavAsynDriver
            double b;
        } _coeff_time[NUM_CAV], _coeff_charge[NUM_CAV];
 
+      struct {
+          double probe[NUM_PROBE];
+      } _weight[NUM_CAV];
+
+       struct {
+           double var_gain;
+           double kp, ki, kd;
+           struct {
+               bool   enable;
+               double bias;
+               double prev_err;
+               double prev_intg;
+               double err;
+               double intg;
+               double derv;
+               double output;
+           } pid;
+           struct {
+               bool      valid;
+               uint32_t  validCnt;
+               uint32_t  invCnt;
+
+               int32_t  dc_freq_raw;
+               int32_t  ampl_raw;
+
+               double dc_freq;
+               double avg_dc_freq;
+               double var_dc_freq;
+               double rms_dc_freq;
+               double ampl;
+               double charge;
+           } probe[NUM_PROBE];
+
+           double dc_freq;
+       } _nco_ctrl[NUM_CAV];
+
 
        BsaChannel BsaChn_time[NUM_CAV];
        BsaChannel BsaChn_charge[NUM_CAV];
@@ -158,6 +206,7 @@ class pcavAsynDriver
         void ParameterSetup(void);
         void bsaSetup(void);
         void monitor(void);
+        void ncoPidCtrl(int cav);
 
 
     protected:
@@ -209,6 +258,33 @@ class pcavAsynDriver
             int a;
             int b;
         } p_coeff_time[NUM_CAV], p_coeff_charge[NUM_CAV];
+
+       struct {
+           int probe[NUM_PROBE];
+       } p_weight[NUM_CAV];
+
+       struct {
+           int ncoPidEnable;
+           int kp, ki, kd;
+           int var_gain;
+
+           struct {
+               int bias;
+               int err;
+               int intg;
+               int derv;
+               int output;
+           } pid;
+
+           struct {
+               int valid_cnt;
+               int inv_cnt;
+               int mean_dcfreq;
+               int rms_dcfreq;
+           } probe[NUM_PROBE];
+
+           int avg_dcfreq;
+       } p_nco_ctrl[NUM_CAV];
 
         struct {
             int raw_time;
@@ -291,6 +367,8 @@ class pcavAsynDriver
 #define COEFF_CHARGE_A_STR       "coeffACharge%d"
 #define COEFF_CHARGE_B_STR       "coeffBCharge%d"
 
+#define WEIGHT_CAV_PROBE_STR     "weightCav%dP%d"
+
 #define TIME_STR                 "time%d"
 #define CHARGE_STR               "charge%d"
 #define RAW_TIME_STR             "raw_time%d"
@@ -314,6 +392,29 @@ class pcavAsynDriver
 // BSA name
 #define BSA_TIME_STR              "%s:TIME%d"             // bsa name for time measurement
 #define BSA_CHARGE_STR            "%s:CHRG%d"             // bsa name for charge measurement
+
+// NCO PID control
+#define KP_NCOPID_STR            "kp_nco_cav%d"
+#define KI_NCOPID_STR            "ki_nco_cav%d"
+#define KD_NCOPID_STR            "kd_nco_cav%d"
+
+#define VAR_GAIN_NCOPID_STR            "var_gain_nco_cav%d"
+#define VALIDCNT_NCOPID_PROBE_STR      "valid_cnt_nco_cav%dP%d"     // valid counter for each probe
+#define INVCNT_NCOPID_PROBE_STR        "inv_cnt_nco_cav%dP%d"       // invalid counter for each probe
+#define MEAN_DCFREQ_NCOPID_PROBE_STR   "mean_dcfreq_nco_cav%dP%d"   // mean of DC frequency for each probe
+#define RMS_DCFREQ_NCOPID_PROBE_STR    "rms_dcfreq_nco_cav%dP%d"    // rms of DC freqency for reach probe
+
+#define AVG_DCFREQ_NCOPID_STR          "avg_dcfreq_nco_cav%d"       // average DC frequency for each cavity
+
+#define BIAS_NCOPID_STR                "bias_nco_cav%d"
+#define ERR_NCOPID_STR                 "err_nco_cav%d"
+#define INTG_NCOPID_STR                "intg_nco_cav%d"
+#define DERV_NCOPID_STR                "derv_nco_cav%d"
+#define OUTPUT_NCOPID_STR              "output_nco_cav%d"
+#define NCOPID_ENABLE_STR              "pid_enable_nco_cav%d"
+
+
+
 
 
 

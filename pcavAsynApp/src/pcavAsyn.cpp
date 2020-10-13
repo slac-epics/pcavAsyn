@@ -115,6 +115,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     stream = (bsaStream && strlen(bsaStream))?epicsStrDup(bsaStream): NULL;
     bsa_name = (bsaPrefix && strlen(bsaPrefix))? epicsStrDup(bsaPrefix): "default_bsa";
     this->pDrv = pDrv;
+    fast_pollCnt = 0;
     pollCnt = 0;
     streamPollCnt = 0;
     current_bsss  = -1;
@@ -134,6 +135,17 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     for(int i = 0; i < NUM_CAV; i++) {
         _coeff_time[i].a = _coeff_charge[i].a = 1.;
         _coeff_time[i].b = _coeff_charge[i].b = 0.;
+
+       _weight[i].probe[0] = _weight[i].probe[1] = 0.5;
+       _nco_ctrl[i].var_gain = 0.04;
+       _nco_ctrl[i].pid = { false, 0., 0., 0., 0., 0., 0., 0.};
+
+
+        for(int j = 0; j < NUM_PROBE; j++) {
+           _nco_ctrl[i].probe[j].validCnt = _nco_ctrl[i].probe[j].invCnt = 0;
+           _nco_ctrl[i].probe[j].avg_dc_freq = 0.;
+           _nco_ctrl[i].probe[j].var_dc_freq = 0.;
+        }
     }
 
     _bld_data = { 0., 0., 0., 0. };
@@ -190,6 +202,17 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
         if(function == p_cavRegLatchPoint[i]) {
             _pcav->setRegLatchPoint(i, (uint32_t) value); goto _escape;
         }
+        if(function == p_nco_ctrl[i].ncoPidEnable) {
+            if(value) {    // enable
+                double bias;
+                getDoubleParam(p_cavNCOPhaseAdj[i], &bias);   // current NCO setting
+                _nco_ctrl[i].pid = { true, bias, 0., 0., 0., 0., 0., 0.};  // set up PID parameters
+            } else {    // disable
+                _nco_ctrl[i].pid.enable =  false;    // set disable flag
+            }
+
+            goto _escape;
+        }
         for(int j = 0; j < NUM_PROBE; j++) {
             if(function == p_cavChanSel[i][j]) {
                 _pcav->setChanSel(i, j, (uint32_t) value); goto _escape;
@@ -200,8 +223,8 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             if(function == p_cavWindowEnd[i][j]) {
                 _pcav->setWindowEnd(i, j, (uint32_t) value); goto _escape;
             }
-        }
-    }
+        }    // probe loop
+    }  // cavity loop
 
     for(int i = 0; i < NUM_WFDATA; i++) {
         if(function == p_wfDataSel[i]) {
@@ -265,6 +288,22 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
             goto _escape;
         }
 
+        if(function == p_nco_ctrl[i].kp) {
+            _nco_ctrl[i].kp = value;    goto _escape;
+        }
+
+        if(function == p_nco_ctrl[i].ki) {
+            _nco_ctrl[i].ki = value;    goto _escape;
+        }
+
+        if(function == p_nco_ctrl[i].kd) {
+            _nco_ctrl[i].kd = value;    goto _escape;
+        }
+
+        if(function == p_nco_ctrl[i].var_gain) {
+            _nco_ctrl[i].var_gain = value;    goto _escape;
+        }
+
         for(int j = 0; j < NUM_PROBE; j++) {
             if(function == p_cavCalibCoeff[i][j]) {
                 unsigned raw;
@@ -272,8 +311,19 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                 setIntegerParam(p_cavCalibCoeffRaw[i][j], raw);
                 goto _escape;
             }
-        }
-    }
+
+            if(function == p_weight[i].probe[j]) {
+               _weight[i].probe[j] = value;
+               double norm = _weight[i].probe[0] + _weight[i].probe[1];
+               if(norm != 0.) {
+                   _weight[i].probe[0] /= norm;
+                   _weight[i].probe[1] /= norm;
+               }
+                goto _escape;
+            }
+        }  // probe loop
+
+    }  // cavity loop
 
 
     _escape:
@@ -317,6 +367,7 @@ asynStatus pcavAsynDriver::writeFloat64Array(asynUser *pasynUser, epicsFloat64 *
 void pcavAsynDriver::report(int interest)
 {
     printf("\tpcavAsyn: version            : %d (%x)\n", version, version);
+    printf("\tpcavAsyn: fast_poll count    : %d\n", fast_pollCnt);
     printf("\tpcavAsyn: poll count         : %u\n", pollCnt);
     printf("\tpcavAsyn: bstream poll count : %u\n", streamPollCnt);
     printf("\tpcavAsyn: bstream read size  : %u\n", stream_read_size);
@@ -340,9 +391,50 @@ void pcavAsynDriver::report(int interest)
     printf("\t          valid channel      : %8.8x\n", (bsss_buf + current_bsss)->payload[u]);
 }
 
+
+void pcavAsynDriver::fast_poll(void)
+{
+
+    fast_pollCnt++;
+
+    for(int i = 0; i < NUM_CAV; i++) {
+        for(int j = 0; j < NUM_PROBE; j++) {
+            _nco_ctrl[i].probe[j].ampl    = _pcav->getOutAmpl(i, j, &(_nco_ctrl[i].probe[j].ampl_raw));
+            _nco_ctrl[i].probe[j].charge  = (double)(_nco_ctrl[i].probe[j].ampl_raw) * _coeff_charge[i].a + _coeff_charge[i].b;
+            _nco_ctrl[i].probe[j].dc_freq = _pcav->getDCFreq(i, j, &(_nco_ctrl[i].probe[j].dc_freq_raw));
+
+            double threshold = (i)?_st_data.thresholdChrg1:_st_data.thresholdChrg0;
+            if(_nco_ctrl[i].probe[j].charge >= threshold) {
+                _nco_ctrl[i].probe[j].valid = true;
+                _nco_ctrl[i].probe[j].validCnt++;
+
+                VAR_CALC(_nco_ctrl[i].probe[j].dc_freq, 
+                         _nco_ctrl[i].var_gain, 
+                         _nco_ctrl[i].probe[j].avg_dc_freq, 
+                         _nco_ctrl[i].probe[j].var_dc_freq);
+
+                _nco_ctrl[i].probe[j].rms_dc_freq = sqrt(_nco_ctrl[i].probe[j].var_dc_freq);
+            } else {
+                _nco_ctrl[i].probe[j].valid = false;
+                _nco_ctrl[i].probe[j].invCnt++;
+
+            }
+        } // probe loop
+
+        if(_nco_ctrl[i].probe[0].valid && _nco_ctrl[i].probe[1].valid) {
+            _nco_ctrl[i].dc_freq = _nco_ctrl[i].probe[0].avg_dc_freq * _weight[i].probe[0]
+                                 + _nco_ctrl[i].probe[1].avg_dc_freq * _weight[i].probe[1];
+        }
+     }  // cavity loop
+}
+
 void pcavAsynDriver::poll(void)
 {
     pollCnt++;
+
+   for(int i = 0; i < NUM_CAV; i++) {
+        if(_nco_ctrl[i].probe[0].valid && _nco_ctrl[i].probe[1].valid) ncoPidCtrl(i);
+    }
     monitor();
     callParamCallbacks();
 }
@@ -382,29 +474,16 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
     _c1p1.phase = _FIX_18_16(p->payload[14]);
     _c1p1.ampl  = p->payload[15];
 
-    _bld_data.time0 = (0.5 * (_c0p0.phase + _c0p1.phase) - _ref.phase) * 1.E+6 / 2852.;
-    _bld_data.time1 = (0.5 * (_c1p0.phase + _c1p1.phase) - _ref.phase) * 1.E+6 / 2852.;
-    _bld_data.charge0 = 0.5 * (_c0p0.ampl + _c0p1.ampl);
-    _bld_data.charge1 = 0.5 * (_c1p0.ampl + _c1p1.ampl);
+    _bld_data.time0 = ((_c0p0.phase * _weight[0].probe[0] + _c0p1.phase * _weight[0].probe[1]) - _ref.phase) * 1.E+6 / 2852.;
+    _bld_data.time1 = ((_c1p0.phase * _weight[1].probe[0] + _c1p1.phase * _weight[1].probe[1]) - _ref.phase) * 1.E+6 / 2852.;
+    _bld_data.charge0 = (_c0p0.ampl * _weight[0].probe[0] + _c0p1.ampl * _weight[0].probe[1]);
+    _bld_data.charge1 = (_c1p0.ampl * _weight[1].probe[0] + _c1p1.ampl * _weight[1].probe[1]);
 
     _bld_data.time0   = _coeff_time[0].a * _bld_data.time0 + _coeff_time[0].b;
     _bld_data.time1   = _coeff_time[1].a * _bld_data.time1 + _coeff_time[1].b;
     _bld_data.charge0 = _coeff_charge[0].a * _bld_data.charge0 + _coeff_charge[0].b;
     _bld_data.charge1 = _coeff_charge[1].a * _bld_data.charge1 + _coeff_charge[1].b;
 
-
-
-#define  VAR_CALC(MEAS,GAIN,MEAN,VAR) \
-{ \
-    double v, v2; \
-    if(isnan(MEAN) || isinf(MEAN)) (MEAN) = 0.; \
-    if(isnan(VAR)  || isinf(VAR))  (VAR)  = 0.; \
-    v = (MEAS) - (MEAN); \
-    (MEAN) += (GAIN) * v; \
-    v = (MEAS) - (MEAN); \
-    v2 = v * v; \
-    (VAR) += (GAIN) * (v2 - (VAR)); \
-}
 
 
     if(_st_data.reset) {
@@ -557,7 +636,16 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(param_name,     CAV_WINDOW_END_STR,   cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowEnd[cav][probe]));
             sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCalibCoeff[cav][probe]));
             sprintf(param_name,     CAV_CALIB_COEFF_RAW_STR, cav, probe); createParam(param_name,  asynParamInt32,   &(p_cavCalibCoeffRaw[cav][probe]));
-        }
+
+            // average weight
+            sprintf(param_name,    WEIGHT_CAV_PROBE_STR, cav, probe); createParam(param_name, asynParamFloat64, &(p_weight[cav].probe[probe]));
+
+
+            sprintf(param_name,   VALIDCNT_NCOPID_PROBE_STR,    cav, probe); createParam(param_name, asynParamInt32,   &(p_nco_ctrl[cav].probe[probe].valid_cnt));
+            sprintf(param_name,   INVCNT_NCOPID_PROBE_STR,      cav, probe); createParam(param_name, asynParamInt32,   &(p_nco_ctrl[cav].probe[probe].inv_cnt));
+            sprintf(param_name,   MEAN_DCFREQ_NCOPID_PROBE_STR, cav, probe); createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].probe[probe].mean_dcfreq));
+            sprintf(param_name,   RMS_DCFREQ_NCOPID_PROBE_STR,  cav, probe); createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].probe[probe].rms_dcfreq));
+        }  // probe loop
         // cavity control, per cavity
         sprintf(param_name, CAV_NCO_PHASE_ADJ_STR, cav); createParam(param_name, asynParamFloat64, &(p_cavNCOPhaseAdj[cav]));
         sprintf(param_name, CAV_FREQ_EVAL_START_STR, cav); createParam(param_name, asynParamInt32, &(p_cavFreqEvalStart[cav]));
@@ -585,7 +673,19 @@ void pcavAsynDriver::ParameterSetup(void)
         sprintf(param_name, THRESHOLD_CHRG_STR, cav);    createParam(param_name, asynParamFloat64,  &(p_result[cav].threshold));
         sprintf(param_name, VAR_GAIN_STR, cav);          createParam(param_name, asynParamFloat64,  &(p_result[cav].var_gain));
 
-    }
+        sprintf(param_name, NCOPID_ENABLE_STR, cav);     createParam(param_name, asynParamInt32,   &(p_nco_ctrl[cav].ncoPidEnable));
+        sprintf(param_name, KP_NCOPID_STR, cav);         createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].kp));
+        sprintf(param_name, KI_NCOPID_STR, cav);         createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].ki));
+        sprintf(param_name, KD_NCOPID_STR, cav);         createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].kd));
+        sprintf(param_name, VAR_GAIN_NCOPID_STR, cav);   createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].var_gain));
+        sprintf(param_name, AVG_DCFREQ_NCOPID_STR, cav); createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].avg_dcfreq));
+
+        sprintf(param_name, BIAS_NCOPID_STR, cav);      createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].pid.bias));
+        sprintf(param_name, ERR_NCOPID_STR,  cav);      createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].pid.err));
+        sprintf(param_name, INTG_NCOPID_STR, cav);      createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].pid.intg));
+        sprintf(param_name, DERV_NCOPID_STR, cav);      createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].pid.derv));
+        sprintf(param_name, OUTPUT_NCOPID_STR, cav);    createParam(param_name, asynParamFloat64, &(p_nco_ctrl[cav].pid.output));
+    }  // cavity loop
 
     sprintf(param_name, RESET_STR);      createParam(param_name, asynParamInt32,        &(p_reset));
     // DacSigGen, baseline I&Q waveforms
@@ -628,16 +728,51 @@ void pcavAsynDriver::monitor(void)
             val = _pcav->getIfQ(i, j, &raw);        setDoubleParam(p_cavIfQ[i][j].val,       val); setIntegerParam(p_cavIfQ[i][j].raw,       raw);
             val = _pcav->getDCReal(i, j, &raw);     setDoubleParam(p_cavDCReal[i][j].val,    val); setIntegerParam(p_cavDCReal[i][j].raw,    raw);
             val = _pcav->getDCImage(i, j, &raw);    setDoubleParam(p_cavDCImage[i][j].val,   val); setIntegerParam(p_cavDCImage[i][j].raw,   raw);
-            val = _pcav->getDCFreq(i, j, &raw);     setDoubleParam(p_cavDCFreq[i][j].val,    val); setIntegerParam(p_cavDCFreq[i][j].raw,    raw);
+
+                                                    setDoubleParam(p_cavDCFreq[i][j].val,  _nco_ctrl[i].probe[j].dc_freq); 
+                                                    setIntegerParam(p_cavDCFreq[i][j].raw, _nco_ctrl[i].probe[j].dc_freq_raw);
+
             val = _pcav->getIntegI(i, j, &raw);     setDoubleParam(p_cavIntegI[i][j].val,    val); setIntegerParam(p_cavIntegI[i][j].raw,    raw);
             val = _pcav->getIntegQ(i, j, &raw);     setDoubleParam(p_cavIntegQ[i][j].val,    val); setIntegerParam(p_cavIntegQ[i][j].raw,    raw);
             val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  val); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
-            val = _pcav->getOutAmpl(i, j, &raw);    setDoubleParam(p_cavOutAmpl[i][j].val,   val); setIntegerParam(p_cavOutAmpl[i][j].raw,   raw);
+
+                                                    setDoubleParam(p_cavOutAmpl[i][j].val,  _nco_ctrl[i].probe[j].ampl); 
+                                                    setIntegerParam(p_cavOutAmpl[i][j].raw, _nco_ctrl[i].probe[j].ampl_raw);
 
             val = _pcav->getCompPhase(i, j, &raw);  setDoubleParam(p_cavCompPhase[i][j].val, val); setIntegerParam(p_cavCompPhase[i][j].raw, raw);
-        }
-    }
 
+                                                    setIntegerParam(p_nco_ctrl[i].probe[j].valid_cnt,  _nco_ctrl[i].probe[j].validCnt);
+                                                    setIntegerParam(p_nco_ctrl[i].probe[j].inv_cnt,    _nco_ctrl[i].probe[j].invCnt);
+                                                    setDoubleParam(p_nco_ctrl[i].probe[j].mean_dcfreq, _nco_ctrl[i].probe[j].avg_dc_freq);
+                                                    setDoubleParam(p_nco_ctrl[i].probe[j].rms_dcfreq,  _nco_ctrl[i].probe[j].rms_dc_freq);
+
+        }    // probe loop
+
+        setDoubleParam(p_nco_ctrl[i].avg_dcfreq, _nco_ctrl[i].dc_freq);
+        setDoubleParam(p_nco_ctrl[i].pid.bias,   _nco_ctrl[i].pid.bias);
+        setDoubleParam(p_nco_ctrl[i].pid.err,    _nco_ctrl[i].pid.err);
+        setDoubleParam(p_nco_ctrl[i].pid.intg,   _nco_ctrl[i].pid.intg);
+        setDoubleParam(p_nco_ctrl[i].pid.derv,   _nco_ctrl[i].pid.derv);
+        if(_nco_ctrl[i].pid.enable) setDoubleParam(p_nco_ctrl[i].pid.output, _nco_ctrl[i].pid.output);
+    }    // cavity loop
+
+
+}
+
+void pcavAsynDriver::ncoPidCtrl(int cav)
+{
+    if(!_nco_ctrl[cav].pid.enable) return;
+
+    _nco_ctrl[cav].pid.err       = -_nco_ctrl[cav].dc_freq;
+    _nco_ctrl[cav].pid.intg      = _nco_ctrl[cav].pid.prev_intg + _nco_ctrl[cav].pid.err;
+    _nco_ctrl[cav].pid.derv      = (_nco_ctrl[cav].pid.err - _nco_ctrl[cav].pid.prev_err);
+    _nco_ctrl[cav].pid.output    =   _nco_ctrl[cav].kp * _nco_ctrl[cav].pid.err 
+                                   + _nco_ctrl[cav].ki * _nco_ctrl[cav].pid.intg 
+                                   + _nco_ctrl[cav].kd * _nco_ctrl[cav].pid.derv 
+                                   + _nco_ctrl[cav].pid.bias;
+
+    _nco_ctrl[cav].pid.prev_err  = _nco_ctrl[cav].pid.err;
+    _nco_ctrl[cav].pid.prev_intg = _nco_ctrl[cav].pid.intg;
 
 }
 
@@ -712,13 +847,19 @@ static int pcavAsynDriverStreamPoll(void *p)
 
 static int pcavAsynDriverPoll(void)
 {
+   int i = 0;
+
     while(keep_stay_in_loop) {
         pDrvList_t *p = (pDrvList_t *) ellFirst(pDrvEllList);
         while(p) {
-            if(p->pcavAsyn) p->pcavAsyn->poll();
+            if(p->pcavAsyn) {
+                p->pcavAsyn->fast_poll();
+                if(!(i % 10)) p->pcavAsyn->poll();   // x10 slow down
+            }
             p = (pDrvList_t *) ellNext(&p->node);
         }
-        epicsThreadSleep(1.);
+        if(++i >= 10) i = 0;
+        epicsThreadSleep(.1);
     }
 
     epicsEventSignal(shutdownEvent);
@@ -733,6 +874,8 @@ static void stopPollingThread(void *p)
     epicsEventWait(shutdownEvent);
     epicsPrintf("pcavAsynDriver: stop polling thread (%s)\n", (char*) p);
 }
+
+
 
 
 // EPICS driver support for pcavAsynDriver
