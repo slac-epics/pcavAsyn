@@ -773,6 +773,7 @@ void pcavAsynDriver::ncoPidCtrl(int cav)
 
     _nco_ctrl[cav].pid.prev_err  = _nco_ctrl[cav].pid.err;
     _nco_ctrl[cav].pid.prev_intg = _nco_ctrl[cav].pid.intg;
+    _nco_ctrl[cav].pid.bias      = _nco_ctrl[cav].pid.output;
 
 }
 
