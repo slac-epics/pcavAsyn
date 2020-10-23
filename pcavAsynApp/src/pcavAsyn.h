@@ -92,6 +92,7 @@ class pcavAsynDriver
         void poll(void);
         void pollStream(void);
         void calcBldData(bsss_packet_t *p);
+        void bsssWf(void);
         void sendBldPacket(bsss_packet_t *p);
         void pushBsaValues(bsss_packet_t *p);
         void updateFastPVs(void);
@@ -203,6 +204,8 @@ class pcavAsynDriver
        BsaChannel BsaChn_charge[NUM_CAV];
         
 
+        double bsss_wf[64];
+
         void ParameterSetup(void);
         void bsaSetup(void);
         void monitor(void);
@@ -304,6 +307,9 @@ class pcavAsynDriver
         // DacSigGen, baseline I&Q
         int i_baseband_wf;
         int q_baseband_wf;
+
+
+        int p_bsss_wf;
 
 
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
@@ -414,7 +420,7 @@ class pcavAsynDriver
 #define NCOPID_ENABLE_STR              "pid_enable_nco_cav%d"
 
 
-
+#define BSSS_WF_STR                    "bsss_wf"        // BSSS waveform beam rate update
 
 
 

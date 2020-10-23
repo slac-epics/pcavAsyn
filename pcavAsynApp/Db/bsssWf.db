@@ -1,0 +1,10 @@
+record(waveform, "$(DEVICE):BSSS_WF")
+{
+    field(DESC, "BSSS wavefirn")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT),0) bsss_wf")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}

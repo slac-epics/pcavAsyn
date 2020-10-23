@@ -35,6 +35,13 @@ file bld.db
 }
 
 
+file bsssWf.db
+{
+    pattern {   DEVICE,                  DTYP,     FTVL, NELM,  TSE }
+            { "$(DEV)", "asynFloat64ArrayOut", "DOUBLE", "25", "-2" }
+}
+
+
 file Bsa.db
 {
   pattern {  DEVICE      ,  ATRB       , LNK      ,  EGU     ,  HOPR,  LOPR  }

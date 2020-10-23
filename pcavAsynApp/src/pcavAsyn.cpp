@@ -454,6 +454,8 @@ void pcavAsynDriver::pollStream(void)
             calcBldData(p);
             sendBldPacket(p);
             pushBsaValues(p);
+
+            bsssWf();
             updateFastPVs();
         }
     }
@@ -517,7 +519,44 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 
 }
 
+void pcavAsynDriver::bsssWf(void)
+{
+    int i = 0;
 
+    bsss_wf[i++] = _ref.phase;
+
+    bsss_wf[i++] = _c0p0.phase;
+    bsss_wf[i++] = _c0p0.ampl;
+    bsss_wf[i++] = _c0p1.phase;
+    bsss_wf[i++] = _c0p1.ampl;
+    bsss_wf[i++] = _c1p0.phase;
+    bsss_wf[i++] = _c1p0.ampl;
+    bsss_wf[i++] = _c1p1.phase;
+    bsss_wf[i++] = _c1p1.ampl;
+
+    bsss_wf[i++] = _bld_data.time0;
+    bsss_wf[i++] = _bld_data.time1;
+    bsss_wf[i++] = _bld_data.charge0;
+    bsss_wf[i++] = _bld_data.charge1;
+
+    bsss_wf[i++] = _st_data.validCnt0;
+    bsss_wf[i++] = _st_data.invalidCnt0;
+    bsss_wf[i++] = _st_data.validCnt1;
+    bsss_wf[i++] = _st_data.invalidCnt1;
+
+    bsss_wf[i++] = _st_data.avg_time0;
+    bsss_wf[i++] = _st_data.avg_time1;
+    bsss_wf[i++] = _st_data.avg_charge0;
+    bsss_wf[i++] = _st_data.avg_charge1;
+    bsss_wf[i++] = _st_data.rms_time0;
+    bsss_wf[i++] = _st_data.rms_time1;
+    bsss_wf[i++] = _st_data.rms_charge0;
+    bsss_wf[i++] = _st_data.rms_charge1;
+
+    doCallbacksFloat64Array(bsss_wf, i, p_bsss_wf, 0);
+    
+ 
+}
 
 void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
 {
@@ -691,6 +730,9 @@ void pcavAsynDriver::ParameterSetup(void)
     // DacSigGen, baseline I&Q waveforms
     sprintf(param_name, I_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(i_baseband_wf));
     sprintf(param_name, Q_BASEBAND_STR); createParam(param_name, asynParamFloat64Array, &(q_baseband_wf));
+
+
+    sprintf(param_name, BSSS_WF_STR); createParam(param_name, asynParamFloat64Array, &(p_bsss_wf));
     
 }
 
