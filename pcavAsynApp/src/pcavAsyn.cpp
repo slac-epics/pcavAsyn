@@ -513,6 +513,8 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
         _st_data.validCnt1++;
         VAR_CALC(_bld_data.time1,   _st_data.var_gain1, _st_data.avg_time1,   _st_data.var_time1);
         VAR_CALC(_bld_data.charge1, _st_data.var_gain1, _st_data.avg_charge1, _st_data.var_charge1);
+        _st_data.rms_time1   = sqrt(_st_data.var_time1);
+        _st_data.rms_charge1 = sqrt(_st_data.var_charge1);
     } else _st_data.invalidCnt1++;
 
 

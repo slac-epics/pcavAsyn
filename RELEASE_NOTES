@@ -1,3 +1,6 @@
+R1.6.1      02-26-2021    Kukhee Kim (khkim)
+                        - bug fixing for the rms_time1 and tims_chg1 update
+
 R1.6.0      10-23-2020    Kukhee Kim (khkim)
                         - implement BSSS waveform (updating at beam reate)
 
