@@ -57,13 +57,28 @@ typedef struct {
     void            *prv;
 } pDrvList_t;
 
+inline static double n_wrap5(double p)  /* wrapround for [-.5, -.5] */
+{
+    if(p >= 0.5) return (p - 1.);
+    if(p < -0.5) return (p + 1.);
 
-inline static double n_wrap(double p)
+    return p;
+}
+
+inline static double n_wrap(double p)   /* wrapround for [-1,1] */
 {
     if(p>=1.) return (p - 2.);
     if(p<-1.) return (p + 2.);
 
     return p;   
+}
+
+inline static double n_wrap180(double p) /* wrapround for [-180, 180] */
+{
+    if(p >= 180.) return (p - 360.);
+    if( p< -180.) return (p + 360.);
+
+    return p;
 }
 
 
