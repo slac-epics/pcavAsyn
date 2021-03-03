@@ -466,18 +466,18 @@ void pcavAsynDriver::pollStream(void)
 
 void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 {
-    _ref.phase  = _FIX_18_16(p->payload[1]);
-    _c0p0.phase = _FIX_18_16(p->payload[2]);
+    _ref.phase  = _FIX_18_17(p->payload[1]);
+    _c0p0.phase = _FIX_18_15(p->payload[2]);
     _c0p0.ampl  = p->payload[3];
-    _c0p1.phase = _FIX_18_16(p->payload[6]);
+    _c0p1.phase = _FIX_18_15(p->payload[6]);
     _c0p1.ampl  = p->payload[7];
-    _c1p0.phase = _FIX_18_16(p->payload[10]);
+    _c1p0.phase = _FIX_18_15(p->payload[10]);
     _c1p0.ampl  = p->payload[11];
-    _c1p1.phase = _FIX_18_16(p->payload[14]);
+    _c1p1.phase = _FIX_18_15(p->payload[14]);
     _c1p1.ampl  = p->payload[15];
 
-    _bld_data.time0 = ((_c0p0.phase * _weight[0].probe[0] + _c0p1.phase * _weight[0].probe[1]) - _ref.phase) * 1.E+6 / 2852.;
-    _bld_data.time1 = ((_c1p0.phase * _weight[1].probe[0] + _c1p1.phase * _weight[1].probe[1]) - _ref.phase) * 1.E+6 / 2852.;
+    _bld_data.time0 = ((_c0p0.phase * _weight[0].probe[0] + _c0p1.phase * _weight[0].probe[1]) - _ref.phase) * 0.5 * 1.E+6 / 2852.;
+    _bld_data.time1 = ((_c1p0.phase * _weight[1].probe[0] + _c1p1.phase * _weight[1].probe[1]) - _ref.phase) * 0.5 * 1.E+6 / 2852.;
     _bld_data.charge0 = (_c0p0.ampl * _weight[0].probe[0] + _c0p1.ampl * _weight[0].probe[1]);
     _bld_data.charge1 = (_c1p0.ampl * _weight[1].probe[0] + _c1p1.ampl * _weight[1].probe[1]);
 

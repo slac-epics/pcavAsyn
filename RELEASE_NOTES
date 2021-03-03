@@ -1,3 +1,6 @@
+R1.6.2      03-01-2021    Kukhee Kim (khkim)
+                        - fix data conversion for BSTREAM, bug fixing for the reference subtraction
+
 R1.6.1      02-26-2021    Kukhee Kim (khkim)
                         - bug fixing for the rms_time1 and tims_chg1 update
 
