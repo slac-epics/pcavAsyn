@@ -734,6 +734,7 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCalibCoeff[cav][probe]));
             sprintf(param_name,     CAV_CALIB_COEFF_RAW_STR, cav, probe); createParam(param_name,  asynParamInt32,   &(p_cavCalibCoeffRaw[cav][probe]));
             sprintf(param_name,     PHASE_OFFSET_STR,     cav, probe); createParam(param_name,     asynParamFloat64, &(p_phaseOffset[cav][probe]));
+            sprintf(param_name,     CAV_OUT_PHASEIU_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavOutPhaseIU[cav][probe]));
 
             // average weight
             sprintf(param_name,    WEIGHT_CAV_PROBE_STR, cav, probe); createParam(param_name, asynParamFloat64, &(p_weight[cav].probe[probe]));
@@ -836,6 +837,7 @@ void pcavAsynDriver::monitor(void)
             val = _pcav->getIntegI(i, j, &raw);     setDoubleParam(p_cavIntegI[i][j].val,    val); setIntegerParam(p_cavIntegI[i][j].raw,    raw);
             val = _pcav->getIntegQ(i, j, &raw);     setDoubleParam(p_cavIntegQ[i][j].val,    val); setIntegerParam(p_cavIntegQ[i][j].raw,    raw);
             val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  n_wrap180(val + 180. * getPhaseOffset(i, j))); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
+                                                    setDoubleParam(p_cavOutPhaseIU[i][j],    val);
 
                                                     setDoubleParam(p_cavOutAmpl[i][j].val,  _nco_ctrl[i].probe[j].ampl); 
                                                     setIntegerParam(p_cavOutAmpl[i][j].raw, _nco_ctrl[i].probe[j].ampl_raw);

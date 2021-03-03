@@ -256,6 +256,7 @@ class pcavAsynDriver
         int     p_cavCalibCoeff[NUM_CAV][NUM_PROBE];
         int     p_cavCalibCoeffRaw[NUM_CAV][NUM_PROBE];
         int     p_phaseOffset[NUM_CAV][NUM_PROBE];
+        int     p_cavOutPhaseIU[NUM_CAV][NUM_PROBE];
 
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
@@ -356,6 +357,7 @@ class pcavAsynDriver
 #define CAV_INTEG_I_STR           "cav%dP%dIntegI"
 #define CAV_INTEG_Q_STR           "cav%dP%dIntegQ"
 #define CAV_OUT_PHASE_STR         "cav%dP%dOutPhase"
+#define CAV_OUT_PHASEIU_STR       "cav%dP%dOutPhaseIU"
 #define CAV_OUT_AMPL_STR          "cav%dP%dOutAmpl"
 
 #define CAV_COMP_PHASE_STR        "cav%dP%dCompPhase"
