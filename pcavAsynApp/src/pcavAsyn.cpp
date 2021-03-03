@@ -522,7 +522,7 @@ void pcavAsynDriver::pollStream(void)
 
 void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 {
-    _ref.phase  = n_wrap(_FIX_18_17(p->payload[1]));
+    _ref.phase  = n_wrap(_FIX_18_15(p->payload[1]));
     _c0p0.phase = n_wrap(_FIX_18_15(p->payload[2]) + _c0p0.phase_offset);
     _c0p0.ampl  = p->payload[3];
     _c0p1.phase = n_wrap(_FIX_18_15(p->payload[6]) + _c0p1.phase_offset);
