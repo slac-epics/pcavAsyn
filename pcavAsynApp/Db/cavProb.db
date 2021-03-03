@@ -67,6 +67,17 @@ record(ao, "$(DEVICE):CAV$(CAV)PRB$(PRB)POFF")
     info(autosaveFields, "VAL")
 }
 
+
+record(calcout, "$(DEVICE):CAV$(CAV)PRB$(PRB)ZEROING")
+{
+    field(DESC, "Phase Zeroing for Cav$(CAV) Prb$(PRB)")
+    field(INPA, "$(DEVICE):CAV$(CAV)PRB$(PRB)OUTPHASE NPP NMS")
+    field(OUT,  "$(DEVICE):CAV$(CAV)PRB$(PRB)POFF PP NMS")
+    field(CALC, "-1. * A")
+    field(SCAN, "Passive")
+
+}
+
 record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)IFAMPL_RAW")
 {
     field(DESC, "Raw value Cal.Coeff for Cav$(CAV)Prb$(PRB)")

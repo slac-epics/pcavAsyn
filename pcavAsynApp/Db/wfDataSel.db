@@ -153,4 +153,17 @@ record(mbbo, "$(DEVICE):WFDATASEL7")
 }
 
 
+
+record(fanout, "$(DEVICE):ZEROING")
+{
+    field(DESC, "Phase Zeroing")
+    field(SCAN, "Passive")
+    field(LNK1, "$(DEVICE):CAV0PRB0ZEROING PP NMS")
+    field(LNK2, "$(DEVICE):CAV0PRB1ZEROING PP NMS")
+    field(LNK3, "$(DEVICE):CAV1PRB0ZEROING PP NMS")
+    field(LNK4, "$(DEVICE):CAV1PRB1ZEROING PP NMS")
+
+}
+
+
 #
