@@ -98,6 +98,8 @@ class pcavAsynDriver
         void updateFastPVs(void);
 
     private:
+        double getPhaseOffset(int cav, int probe);
+
         void        *pDrv;
         const char  *port;
         const char  *path;
@@ -116,6 +118,7 @@ class pcavAsynDriver
         bsss_packet_t   bsss_buf[MAX_BSSS_BUF];
 
         struct {
+            double phase_offset;
             double phase;
             double ampl;
         } _ref, _c0p0, _c0p1, _c1p0, _c1p1;
@@ -252,6 +255,7 @@ class pcavAsynDriver
 
         int     p_cavCalibCoeff[NUM_CAV][NUM_PROBE];
         int     p_cavCalibCoeffRaw[NUM_CAV][NUM_PROBE];
+        int     p_phaseOffset[NUM_CAV][NUM_PROBE];
 
         // 2 cavities
         int     p_cavNCOPhaseAdj[NUM_CAV];
@@ -362,7 +366,7 @@ class pcavAsynDriver
 
 #define CAV_CALIB_COEFF_STR       "cav%dP%dCalibCoeff"
 #define CAV_CALIB_COEFF_RAW_STR   "cav%dP%dCalibCoeffRaw"
-
+#define PHASE_OFFSET_STR          "cav%dP%dPhaseOffset"
 /* 2 cavities */
 #define CAV_NCO_PHASE_ADJ_STR     "cav%dNCOPhaseAdj"
 #define CAV_NCO_RAW_STR           "cav%dNCORaw"          // NOC raw set value to verify

@@ -58,6 +58,15 @@ typedef struct {
 } pDrvList_t;
 
 
+inline static double n_wrap(double p)
+{
+    if(p>=1.) return (p - 2.);
+    if(p<-1.) return (p + 2.);
+
+    return p;   
+}
+
+
 static void init_drvList(void)
 {
     if(!pDrvEllList) {
@@ -148,6 +157,8 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
         }
     }
 
+    _ref = _c0p0 = _c0p1 = _c1p0 = _c1p1 = { 0., 0., 0.,};
+   
     _bld_data = { 0., 0., 0., 0. };
     _st_data  = { true,
                   0, 0, 0, 0,
@@ -312,6 +323,36 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                 goto _escape;
             }
 
+            if(function == p_phaseOffset[i][j]) {
+                double phase_offset = value / 180.;
+
+                switch(i) {
+                    case 0:
+                        switch(j) {
+                            case 0:
+                                _c0p0.phase_offset = phase_offset;
+                                break;
+                            case 1:
+                                _c0p1.phase_offset = phase_offset;
+                                break;
+                        }
+                        break;
+                    case 1:
+                        switch(j) {
+                            case 0:
+                                _c1p0.phase_offset = phase_offset;
+                                break;
+                            case 1:
+                                _c1p1.phase_offset = phase_offset;
+                                break;
+                        }
+                        break;
+                }
+
+                goto _escape;
+            }
+
+
             if(function == p_weight[i].probe[j]) {
                _weight[i].probe[j] = value;
                double norm = _weight[i].probe[0] + _weight[i].probe[1];
@@ -466,14 +507,14 @@ void pcavAsynDriver::pollStream(void)
 
 void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 {
-    _ref.phase  = _FIX_18_17(p->payload[1]);
-    _c0p0.phase = _FIX_18_15(p->payload[2]);
+    _ref.phase  = n_wrap(_FIX_18_17(p->payload[1]));
+    _c0p0.phase = n_wrap(_FIX_18_15(p->payload[2]) + _c0p0.phase_offset);
     _c0p0.ampl  = p->payload[3];
-    _c0p1.phase = _FIX_18_15(p->payload[6]);
+    _c0p1.phase = n_wrap(_FIX_18_15(p->payload[6]) + _c0p1.phase_offset);
     _c0p1.ampl  = p->payload[7];
-    _c1p0.phase = _FIX_18_15(p->payload[10]);
+    _c1p0.phase = n_wrap(_FIX_18_15(p->payload[10]) + _c1p0.phase_offset);
     _c1p0.ampl  = p->payload[11];
-    _c1p1.phase = _FIX_18_15(p->payload[14]);
+    _c1p1.phase = n_wrap(_FIX_18_15(p->payload[14]) + _c1p1.phase_offset);
     _c1p1.ampl  = p->payload[15];
 
     _bld_data.time0 = ((_c0p0.phase * _weight[0].probe[0] + _c0p1.phase * _weight[0].probe[1]) - _ref.phase) * 0.5 * 1.E+6 / 2852.;
@@ -677,6 +718,7 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(param_name,     CAV_WINDOW_END_STR,   cav, probe); createParam(param_name,     asynParamInt32,   &(p_cavWindowEnd[cav][probe]));
             sprintf(param_name,     CAV_CALIB_COEFF_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavCalibCoeff[cav][probe]));
             sprintf(param_name,     CAV_CALIB_COEFF_RAW_STR, cav, probe); createParam(param_name,  asynParamInt32,   &(p_cavCalibCoeffRaw[cav][probe]));
+            sprintf(param_name,     PHASE_OFFSET_STR,     cav, probe); createParam(param_name,     asynParamFloat64, &(p_phaseOffset[cav][probe]));
 
             // average weight
             sprintf(param_name,    WEIGHT_CAV_PROBE_STR, cav, probe); createParam(param_name, asynParamFloat64, &(p_weight[cav].probe[probe]));
@@ -778,7 +820,7 @@ void pcavAsynDriver::monitor(void)
 
             val = _pcav->getIntegI(i, j, &raw);     setDoubleParam(p_cavIntegI[i][j].val,    val); setIntegerParam(p_cavIntegI[i][j].raw,    raw);
             val = _pcav->getIntegQ(i, j, &raw);     setDoubleParam(p_cavIntegQ[i][j].val,    val); setIntegerParam(p_cavIntegQ[i][j].raw,    raw);
-            val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  val); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
+            val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  val + getPhaseOffset(i, j)); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
 
                                                     setDoubleParam(p_cavOutAmpl[i][j].val,  _nco_ctrl[i].probe[j].ampl); 
                                                     setIntegerParam(p_cavOutAmpl[i][j].raw, _nco_ctrl[i].probe[j].ampl_raw);
@@ -819,6 +861,37 @@ void pcavAsynDriver::ncoPidCtrl(int cav)
     _nco_ctrl[cav].pid.prev_intg = _nco_ctrl[cav].pid.intg;
     _nco_ctrl[cav].pid.bias      = _nco_ctrl[cav].pid.output;
 
+}
+
+
+double pcavAsynDriver::getPhaseOffset(int cav, int probe)
+{
+    double phase_offset = 0.;
+
+                switch(cav) {
+                    case 0:
+                        switch(probe) {
+                            case 0:
+                                phase_offset = _c0p0.phase_offset;
+                                break;
+                            case 1:
+                                phase_offset = _c0p1.phase_offset;
+                                break;
+                        }
+                        break;
+                    case 1:
+                        switch(probe) {
+                            case 0:
+                                phase_offset = _c1p0.phase_offset;
+                                break;
+                            case 1:
+                                phase_offset = _c1p1.phase_offset;
+                                break;
+                        }
+                        break;
+                }
+
+    return phase_offset;
 }
 
 
