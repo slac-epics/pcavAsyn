@@ -835,7 +835,7 @@ void pcavAsynDriver::monitor(void)
 
             val = _pcav->getIntegI(i, j, &raw);     setDoubleParam(p_cavIntegI[i][j].val,    val); setIntegerParam(p_cavIntegI[i][j].raw,    raw);
             val = _pcav->getIntegQ(i, j, &raw);     setDoubleParam(p_cavIntegQ[i][j].val,    val); setIntegerParam(p_cavIntegQ[i][j].raw,    raw);
-            val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  val + getPhaseOffset(i, j)); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
+            val = _pcav->getOutPhase(i, j, &raw);   setDoubleParam(p_cavOutPhase[i][j].val,  n_wrap180(val + getPhaseOffset(i, j))); setIntegerParam(p_cavOutPhase[i][j].raw,  raw);
 
                                                     setDoubleParam(p_cavOutAmpl[i][j].val,  _nco_ctrl[i].probe[j].ampl); 
                                                     setIntegerParam(p_cavOutAmpl[i][j].raw, _nco_ctrl[i].probe[j].ampl_raw);
