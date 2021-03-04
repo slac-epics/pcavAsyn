@@ -49,5 +49,11 @@ file Bsa.db
           { "$(DEV)"  ,    "TIME1"     , ""       , "ps"     ,    "",    ""  }
           { "$(DEV)"  ,    "CHRG0"     , ""       , "pC"     ,    "",    ""  }
           { "$(DEV)"  ,    "CHRG1"     , ""       , "pC"     ,    "",    ""  }
+#
+          { "$(DEV)"  ,    "REFPHS"    , ""       , "degree" ,    "",    ""  }
+          { "$(DEV)"  ,    "PHS00"     , ""       , "degree" ,    "",    ""  }
+          { "$(DEV)"  ,    "PHS01"     , ""       , "degree" ,    "",    ""  }
+          { "$(DEV)"  ,    "PHS10"     , ""       , "degree" ,    "",    ""  }
+          { "$(DEV)"  ,    "PHS11"     , ""       , "degree" ,    "",    ""  }
 }
 

@@ -205,6 +205,8 @@ class pcavAsynDriver
 
        BsaChannel BsaChn_time[NUM_CAV];
        BsaChannel BsaChn_charge[NUM_CAV];
+       BsaChannel BsaChn_refPhase;
+       BsaChannel BsaChn_phase[NUM_CAV][NUM_PROBE];
         
 
         double bsss_wf[64];
@@ -404,6 +406,8 @@ class pcavAsynDriver
 // BSA name
 #define BSA_TIME_STR              "%s:TIME%d"             // bsa name for time measurement
 #define BSA_CHARGE_STR            "%s:CHRG%d"             // bsa name for charge measurement
+#define BSA_PHASE_STR             "%s:PHS%d%d"            // bsa name for phase (cav,probe)
+#define BSA_REF_PHASE_STR         "%s:REFPHS"             // bsa name for reference phase
 
 // NCO PID control
 #define KP_NCOPID_STR            "kp_nco_cav%d"

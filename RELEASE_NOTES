@@ -1,3 +1,6 @@
+R1.7.1      03-04-2021    Kukhee Kim (khkim)
+                        - add BSA channels for reference phase and 4 probes
+
 R1.7.0      03-03-2021    Kukhee Kim (khkim)
                         - add phase offset for zeroing to avoid wrapround issue on the bolder
                         - add phase zeroing PV and logic

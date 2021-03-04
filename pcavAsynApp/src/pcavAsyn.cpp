@@ -622,6 +622,13 @@ void pcavAsynDriver::pushBsaValues(bsss_packet_t *p)
     BSA_StoreData(BsaChn_time[1], p->time, _bld_data.time1, 0, 0);
     BSA_StoreData(BsaChn_charge[0], p->time, _bld_data.charge0, 0, 0);
     BSA_StoreData(BsaChn_charge[1], p->time, _bld_data.charge1, 0, 0);
+
+    BSA_StoreData(BsaChn_refPhase,    p->time, _ref.phase  * 180., 0, 0);
+    BSA_StoreData(BsaChn_phase[0][0], p->time, _c0p0.phase * 180., 0, 0);
+    BSA_StoreData(BsaChn_phase[0][1], p->time, _c0p1.phase * 180., 0, 0);
+    BSA_StoreData(BsaChn_phase[1][0], p->time, _c1p0.phase * 180., 0, 0);
+    BSA_StoreData(BsaChn_phase[1][1], p->time, _c1p1.phase * 180., 0, 0);
+
 }
 
 
@@ -802,10 +809,16 @@ void pcavAsynDriver::bsaSetup(void)
 
     BSA_ConfigSetAllPriorites(90);
 
-    for(int i = 0; i < NUM_CAV; i++) {
+    sprintf(param_name, BSA_REF_PHASE_STR,  bsa_name);     BsaChn_refPhase  = BSA_CreateChannel(param_name);
+
+    for(int i = 0; i < NUM_CAV; i++) {  /* cavity loop */
         sprintf(param_name, BSA_TIME_STR,   bsa_name, i);  BsaChn_time[i]   = BSA_CreateChannel(param_name);
         sprintf(param_name, BSA_CHARGE_STR, bsa_name, i);  BsaChn_charge[i] = BSA_CreateChannel(param_name);
-    }
+
+        for(int j = 0; j < NUM_PROBE; j++) {  /* probe loop */
+            sprintf(param_name, BSA_PHASE_STR, bsa_name, i, j); BsaChn_phase[i][j] = BSA_CreateChannel(param_name);
+        }  /* probe loop */
+    }  /* cavity loop */
 }
 
 
