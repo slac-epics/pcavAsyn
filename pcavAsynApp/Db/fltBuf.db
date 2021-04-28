@@ -1,0 +1,34 @@
+record(waveform, "$(DEVICE):CBUF:PID")
+{
+    field(DESC, "Circular buffer for pulseid")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_pulseid")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}
+
+record(ao, "$(DEVICE):CBUF:AMPLTHREAD")
+{
+    field(PINI, "YES")
+    field(DESC, "Amplitude Threshold")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0) thredampl_fltbuf")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(EGU,  "")
+    info(autosaveFields, "VAL")
+}
+
+record(ao, "$(DEVICE):CBUF:CLEAR")
+{
+    field(DESC, "Clear circular buffers")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) clear_fltbuf")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(ZNAM, "clear")
+    field(ONAM, "CLEAR")
+}
+

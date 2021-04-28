@@ -1,3 +1,6 @@
+R1.7.2      04-23-2021    Kukhee Kim (khkim)
+                        - add ring buffer to record fault or unexpected phase jump (arriaval time jump)
+
 R1.7.1      03-04-2021    Kukhee Kim (khkim)
                         - add BSA channels for reference phase and 4 probes
 

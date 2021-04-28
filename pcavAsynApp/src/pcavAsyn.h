@@ -26,6 +26,9 @@
 #define NUM_PROBE       2       // number of probes per cavity 
 #define MAX_BSSS_BUF   36
 
+#define FLTBUF_LEN     1024     // length of fault buffer
+#define MAX_FLTBUF     4        // number of fulat buffer
+
 
 #define NUM_WFDATA      8
 
@@ -92,6 +95,8 @@ class pcavAsynDriver
         void poll(void);
         void pollStream(void);
         void calcBldData(bsss_packet_t *p);
+        void pushCircularBuffer(bsss_packet_t *p);
+        void postCircularBuffer(bsss_packet_t *p);
         void bsssWf(void);
         void sendBldPacket(bsss_packet_t *p);
         void pushBsaValues(bsss_packet_t *p);
@@ -211,6 +216,35 @@ class pcavAsynDriver
 
         double bsss_wf[64];
 
+        struct {
+            bool  active;
+            bool  empty;
+            int    wp;
+
+            double threshold;
+            double latch_ncoPhase[2];
+
+            double phase_c0p0[FLTBUF_LEN * 2];
+            double phase_c0p1[FLTBUF_LEN * 2];
+            double phase_c1p0[FLTBUF_LEN * 2];
+            double phase_c1p1[FLTBUF_LEN * 2];
+
+            double  ampl_c0p0[FLTBUF_LEN * 2];
+            double  ampl_c0p1[FLTBUF_LEN * 2];
+            double  ampl_c1p0[FLTBUF_LEN * 2];
+            double  ampl_c1p1[FLTBUF_LEN * 2];
+
+            double   time0[FLTBUF_LEN * 2];
+            double   time1[FLTBUF_LEN * 2];
+            double charge0[FLTBUF_LEN * 2];
+            double charge1[FLTBUF_LEN * 2];
+            double ncoPhase0[FLTBUF_LEN * 2];
+            double ncoPhase1[FLTBUF_LEN * 2];
+
+            unsigned int pulseid[FLTBUF_LEN *2];
+
+        } _circular_buffer;
+
         void ParameterSetup(void);
         void bsaSetup(void);
         void monitor(void);
@@ -317,6 +351,15 @@ class pcavAsynDriver
 
 
         int p_bsss_wf;
+
+        int p_clear_fltbuf;
+        int p_thredampl_fltbuf;
+        int p_fltbuf_phase[NUM_CAV][NUM_PROBE];
+        int p_fltbuf_ampl[NUM_CAV][NUM_PROBE];
+        int p_fltbuf_time[NUM_CAV];
+        int p_fltbuf_charge[NUM_CAV];
+        int p_fltbuf_ncoPhase[NUM_CAV];
+        int p_fltbuf_pulseid;
 
 
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
@@ -432,6 +475,15 @@ class pcavAsynDriver
 
 #define BSSS_WF_STR                    "bsss_wf"        // BSSS waveform beam rate update
 
+
+#define CLEAR_FLTBUF_STR               "clear_fltbuf"             // clear fault buffer
+#define THREDAMPL_FLTBUF_STR           "thredampl_fltbuf"         // threshold amplitude for fault buffer
+#define FLTBUF_PHASE_STR               "fltBuf_phase_cav%dP%d"    // fault buffer for phase
+#define FLTBUF_AMPL_STR                "fltBuf_ampl_cav%dP%d"     // fault buffer for amplitude
+#define FLTBUF_TIME_STR                "fltBuf_time_cav%d"        // fault buffer for arrival time
+#define FLTBUF_CHARGE_STR              "fltBuf_charge_cav%d"      // fault buffer for charge
+#define FLTBUF_NCOPHASE_STR            "fltBuf_ncoPhase_cav%d"    // fault buffer for NCO phase 
+#define FLTBUF_PULSEID_STR             "fltBuf_pulseid"           // fault buffer for pulse id
 
 
 #endif /* _PCAVASYN_H */

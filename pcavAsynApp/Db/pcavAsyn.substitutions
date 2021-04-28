@@ -57,3 +57,27 @@ file Bsa.db
           { "$(DEV)"  ,    "PHS11"     , ""       , "degree" ,    "",    ""  }
 }
 
+
+file fltBuf.db
+{
+    pattern {   DEVICE,                 DTYP,      FTVL,   NELM,   TSE }
+            { "$(DEV)",  "asynInt32ArrayOut",   "ULONG",   1024,    -2 }
+}
+
+
+file fltBufCav.db
+{
+    pattern {   DEVICE,   CAV,                   DTYP,       FTVL,   NELM,   TSE }
+            { "$(DEV)",     0,  "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+            { "$(DEV)",     1,  "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+}
+
+
+file fltBufCavProb.db
+{
+    pattern {   DEVICE,   CAV,   P,                    DTYP,       FTVL,   NELM,   TSE }
+            { "$(DEV)",     0,   0,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+            { "$(DEV)",     0,   1,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+            { "$(DEV)",     1,   0,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+            { "$(DEV)",     1,   1,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
+}

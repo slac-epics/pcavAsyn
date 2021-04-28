@@ -1,0 +1,22 @@
+record(waveform, "$(DEVICE):CBUF$(CAV)$(P):PHASE")
+{
+    field(DESC, "Circular buffer for phase Cav$(CAV) Probe$(P)")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_phase_cav$(CAV)P$(P)")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}
+
+
+record(waveform, "$(DEVICE):CBUF$(CAV)$(P):AMPL")
+{
+    field(DESC, "Circular buffer for ampl Cav$(CAV) Probe$(P)")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_ampl_cav$(CAV)P$(P)")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}

@@ -41,6 +41,9 @@
 #include "pcavAsyn.h"
 
 
+#define PULSEID_(time) ((time).nsec & 0x0001ffff)
+
+
 static bool            keep_stay_in_loop = true;
 static epicsEventId    shutdownEvent;
 
@@ -182,6 +185,19 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
                   0., 0., 0., 0.,
                   0., 0., 0., 0 };
 
+    // initialize the circular_buffer
+    _circular_buffer.active = true;
+    _circular_buffer.empty  = true;
+    _circular_buffer.wp = 0;
+    _circular_buffer.latch_ncoPhase[0] = _circular_buffer.latch_ncoPhase[1] = 0.;
+    for(int i = 0; i < FLTBUF_LEN *2; i++) {
+        _circular_buffer.phase_c0p0[i] = _circular_buffer.phase_c0p1[i] = _circular_buffer.phase_c1p0[i] = _circular_buffer.phase_c1p1[i] = 0.;
+        _circular_buffer.ampl_c0p0[i]  = _circular_buffer.ampl_c0p1[i]  = _circular_buffer.ampl_c1p0[i]  = _circular_buffer.ampl_c1p1[i]  = 0.;
+        _circular_buffer.time0[i]      = _circular_buffer.time1[i]      = 0.;
+        _circular_buffer.charge0[i]    = _circular_buffer.charge1[i]    = 0.;
+        _circular_buffer.ncoPhase0[i]  = _circular_buffer.ncoPhase1[i]  = 0.;
+        _circular_buffer.pulseid[i]    = 0;
+    }
 
     ParameterSetup();
     bsaSetup();
@@ -215,7 +231,12 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
     }
     else
-    if(function == p_rfRefSel)                 _pcav->setRefSel((uint32_t) value);
+    if(function == p_rfRefSel){                 _pcav->setRefSel((uint32_t) value); goto _escape;
+    }
+    else
+    if(function == p_clear_fltbuf && value){   _circular_buffer.active = true;  // re-activate the circular buffer
+                                               goto _escape;
+    }
     else
 
     for(int i = 0; i < NUM_CAV; i++) {
@@ -272,8 +293,14 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
     status = (asynStatus) setDoubleParam(function, value);
 
+    if(function == p_thredampl_fltbuf) {
+        _circular_buffer.threshold = value;
+        goto _escape;
+    }
+
     for(int i = 0; i < NUM_CAV; i++) {
         if(function == p_cavNCOPhaseAdj[i]) {
+            _circular_buffer.latch_ncoPhase[i] = value;
             uint32_t raw = _pcav->setNCO(i, value); 
             setIntegerParam(p_cavNCORaw[i], raw);
             goto _escape;
@@ -510,7 +537,7 @@ void pcavAsynDriver::pollStream(void)
             calcBldData(p);
             sendBldPacket(p);
             pushBsaValues(p);
-
+            pushCircularBuffer(p);
             bsssWf();
             updateFastPVs();
         }
@@ -519,6 +546,68 @@ void pcavAsynDriver::pollStream(void)
 
 }
 
+void pcavAsynDriver::pushCircularBuffer(bsss_packet_t *p)
+{
+    if(!_circular_buffer.active) return;  // nonthing todo until the active flag turns back to active
+
+    int wp = _circular_buffer.wp;
+
+    _circular_buffer.phase_c0p0[wp] = _circular_buffer.phase_c0p0[wp + FLTBUF_LEN] = _c0p0.phase * 180.;
+    _circular_buffer.phase_c0p1[wp] = _circular_buffer.phase_c0p1[wp + FLTBUF_LEN] = _c0p1.phase * 180.;
+    _circular_buffer.phase_c1p0[wp] = _circular_buffer.phase_c1p0[wp + FLTBUF_LEN] = _c1p0.phase * 180.;
+    _circular_buffer.phase_c1p1[wp] = _circular_buffer.phase_c1p1[wp + FLTBUF_LEN] = _c1p1.phase * 180.;
+
+    _circular_buffer.ampl_c0p0[wp]  = _circular_buffer.ampl_c0p0[wp + FLTBUF_LEN]  = _c0p0.ampl;
+    _circular_buffer.ampl_c0p1[wp]  = _circular_buffer.ampl_c0p1[wp + FLTBUF_LEN]  = _c0p1.ampl;
+    _circular_buffer.ampl_c1p0[wp]  = _circular_buffer.ampl_c1p0[wp + FLTBUF_LEN]  = _c1p0.ampl;
+    _circular_buffer.ampl_c1p1[wp]  = _circular_buffer.ampl_c1p1[wp + FLTBUF_LEN]  = _c1p1.ampl;
+
+    _circular_buffer.time0[wp] = _circular_buffer.time0[wp + FLTBUF_LEN] = _bld_data.time0;
+    _circular_buffer.time1[wp] = _circular_buffer.time1[wp + FLTBUF_LEN] = _bld_data.time1;
+
+    _circular_buffer.charge0[wp] = _circular_buffer.charge0[wp + FLTBUF_LEN] = _bld_data.charge0;
+    _circular_buffer.charge1[wp] = _circular_buffer.charge1[wp + FLTBUF_LEN] = _bld_data.charge1;
+
+    _circular_buffer.ncoPhase0[wp] = _circular_buffer.ncoPhase0[wp + FLTBUF_LEN] = _circular_buffer.latch_ncoPhase[0];
+    _circular_buffer.ncoPhase1[wp] = _circular_buffer.ncoPhase1[wp + FLTBUF_LEN] = _circular_buffer.latch_ncoPhase[1];
+
+    _circular_buffer.pulseid[wp] = _circular_buffer.pulseid[wp + FLTBUF_LEN] = PULSEID_(p->time);
+
+    if(!_circular_buffer.empty) {    // check up if there is an arrival time jump
+        if(fabs(_circular_buffer.time0[wp + FLTBUF_LEN] - _circular_buffer.time0[wp - 1 + FLTBUF_LEN]) >= _circular_buffer.threshold ||
+           fabs(_circular_buffer.time1[wp + FLTBUF_LEN] - _circular_buffer.time1[wp - 1 + FLTBUF_LEN]) >= _circular_buffer.threshold) {  // a jump is detected
+            _circular_buffer.active = false;
+            _circular_buffer.empty  = true;
+            // post the circular buffer PVs.
+            postCircularBuffer(p);
+        }
+    } else _circular_buffer.empty = false;
+
+    if(++_circular_buffer.wp >= FLTBUF_LEN) _circular_buffer.wp = 0;
+}
+
+
+void pcavAsynDriver::postCircularBuffer(bsss_packet_t *p)
+{
+    int rp = _circular_buffer.wp +1;
+
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.phase_c0p0 + rp), FLTBUF_LEN, p_fltbuf_phase[0][0], 0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.phase_c0p1 + rp), FLTBUF_LEN, p_fltbuf_phase[0][1], 0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.phase_c1p0 + rp), FLTBUF_LEN, p_fltbuf_phase[1][0], 0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.phase_c1p1 + rp), FLTBUF_LEN, p_fltbuf_phase[1][1], 0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ampl_c0p0 + rp),  FLTBUF_LEN, p_fltbuf_ampl[0][0],  0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ampl_c0p1 + rp),  FLTBUF_LEN, p_fltbuf_ampl[0][1],  0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ampl_c1p0 + rp),  FLTBUF_LEN, p_fltbuf_ampl[1][0],  0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ampl_c1p1 + rp),  FLTBUF_LEN, p_fltbuf_ampl[1][1],  0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.time0 + rp),      FLTBUF_LEN, p_fltbuf_time[0],     0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.time1 + rp),      FLTBUF_LEN, p_fltbuf_time[1],     0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.charge0 + rp),    FLTBUF_LEN, p_fltbuf_charge[0],   0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.charge1 + rp),    FLTBUF_LEN, p_fltbuf_charge[1],   0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ncoPhase0 + rp),  FLTBUF_LEN, p_fltbuf_ncoPhase[0], 0);
+    doCallbacksFloat64Array((epicsFloat64 *)(_circular_buffer.ncoPhase1 + rp),  FLTBUF_LEN, p_fltbuf_ncoPhase[1], 0);
+
+    doCallbacksInt32Array((epicsInt32 *) (_circular_buffer.pulseid + rp), FLTBUF_LEN, p_fltbuf_pulseid, 0);
+}
 
 void pcavAsynDriver::calcBldData(bsss_packet_t *p)
 {
@@ -800,6 +889,20 @@ void pcavAsynDriver::ParameterSetup(void)
 
 
     sprintf(param_name, BSSS_WF_STR); createParam(param_name, asynParamFloat64Array, &(p_bsss_wf));
+
+    // for circular buffer (fault buffer)
+    sprintf(param_name, CLEAR_FLTBUF_STR);     createParam(param_name, asynParamInt32,      &p_clear_fltbuf);
+    sprintf(param_name, THREDAMPL_FLTBUF_STR); createParam(param_name, asynParamFloat64,    &p_thredampl_fltbuf);
+    sprintf(param_name, FLTBUF_PULSEID_STR);   createParam(param_name, asynParamInt32Array, &p_fltbuf_pulseid);
+    for(int i = 0; i < NUM_CAV; i++) {
+        sprintf(param_name, FLTBUF_TIME_STR,     i); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_time[i]));
+        sprintf(param_name, FLTBUF_CHARGE_STR,   i); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_charge[i]));
+        sprintf(param_name, FLTBUF_NCOPHASE_STR, i); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_ncoPhase[i]));
+        for(int j = 0; j < NUM_PROBE; j++) {
+            sprintf(param_name, FLTBUF_PHASE_STR, i, j); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_phase[i][j]));
+            sprintf(param_name, FLTBUF_AMPL_STR,  i, j); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_ampl[i][j]));
+        }
+    }
     
 }
 

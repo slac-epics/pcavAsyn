@@ -1,0 +1,36 @@
+record(waveform, "$(DEVICE):CBUF$(CAV):TIME")
+{
+    field(DESC, "Circular buffer for time for Cav$(CAV)")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_time_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}
+
+
+record(waveform, "$(DEVICE):CBUF$(CAV):CHARGE")
+{
+    field(DESC, "Circular buffer for charge for Cav$(CAV)")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_charge_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}
+
+
+record(waveform, "$(DEVICE):CBUF$(CAV):NCOPHASE")
+{
+    field(DESC, "Circular buffer for NCO phase for Cav$(CAV)")
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT), 0) fltBuf_ncoPhase_cav$(CAV)")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "$(FTVL)")
+    field(NELM, "$(NELM)")
+    field(TSE,  "$(TSE)")
+}
+
+
