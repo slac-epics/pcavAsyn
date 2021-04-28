@@ -293,7 +293,7 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
     status = (asynStatus) setDoubleParam(function, value);
 
-    if(function == p_thredampl_fltbuf) {
+    if(function == p_thredtime_fltbuf) {
         _circular_buffer.threshold = value;
         goto _escape;
     }
@@ -892,8 +892,11 @@ void pcavAsynDriver::ParameterSetup(void)
 
     // for circular buffer (fault buffer)
     sprintf(param_name, CLEAR_FLTBUF_STR);     createParam(param_name, asynParamInt32,      &p_clear_fltbuf);
-    sprintf(param_name, THREDAMPL_FLTBUF_STR); createParam(param_name, asynParamFloat64,    &p_thredampl_fltbuf);
+    sprintf(param_name, THREDTIME_FLTBUF_STR); createParam(param_name, asynParamFloat64,    &p_thredtime_fltbuf);
     sprintf(param_name, FLTBUF_PULSEID_STR);   createParam(param_name, asynParamInt32Array, &p_fltbuf_pulseid);
+    sprintf(param_name, FLTBUF_STATUS_STR);    createParam(param_name, asynParamInt32,      &p_fltbuf_status);
+    sprintf(param_name, FLTBUF_WRTPT_STR);     createParam(param_name, asynParamInt32,      &p_fltbuf_wrtpt);
+
     for(int i = 0; i < NUM_CAV; i++) {
         sprintf(param_name, FLTBUF_TIME_STR,     i); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_time[i]));
         sprintf(param_name, FLTBUF_CHARGE_STR,   i); createParam(param_name, asynParamFloat64Array, &(p_fltbuf_charge[i]));
@@ -937,6 +940,10 @@ void pcavAsynDriver::monitor(void)
     val = _pcav->getRefPhase(&raw);  setDoubleParam(p_rfRefPhase.val, val); setIntegerParam(p_rfRefPhase.raw, raw);  
     val = _pcav->getRefI(&raw);      setDoubleParam(p_rfRefI.val,     val); setIntegerParam(p_rfRefI.raw,     raw);
     val = _pcav->getRefQ(&raw);      setDoubleParam(p_rfRefQ.val,     val); setIntegerParam(p_rfRefQ.raw,     raw);
+
+    setIntegerParam(p_fltbuf_wrtpt,  _circular_buffer.wp);
+    setIntegerParam(p_fltbuf_status, _circular_buffer.active?1:0);
+    
 
     for(int i = 0; i < NUM_CAV; i++) {
         for(int j = 0; j < NUM_PROBE; j++) {

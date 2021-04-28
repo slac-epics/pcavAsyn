@@ -353,13 +353,15 @@ class pcavAsynDriver
         int p_bsss_wf;
 
         int p_clear_fltbuf;
-        int p_thredampl_fltbuf;
+        int p_thredtime_fltbuf;
         int p_fltbuf_phase[NUM_CAV][NUM_PROBE];
         int p_fltbuf_ampl[NUM_CAV][NUM_PROBE];
         int p_fltbuf_time[NUM_CAV];
         int p_fltbuf_charge[NUM_CAV];
         int p_fltbuf_ncoPhase[NUM_CAV];
         int p_fltbuf_pulseid;
+        int p_fltbuf_status;
+        int p_fltbuf_wrtpt;
 
 
 #if (ASYN_VERSION <<8 | ASYN_REVISION) < (4<<8 | 32)
@@ -477,13 +479,15 @@ class pcavAsynDriver
 
 
 #define CLEAR_FLTBUF_STR               "clear_fltbuf"             // clear fault buffer
-#define THREDAMPL_FLTBUF_STR           "thredampl_fltbuf"         // threshold amplitude for fault buffer
+#define THREDTIME_FLTBUF_STR           "thredtime_fltbuf"         // threshold time jump
 #define FLTBUF_PHASE_STR               "fltBuf_phase_cav%dP%d"    // fault buffer for phase
 #define FLTBUF_AMPL_STR                "fltBuf_ampl_cav%dP%d"     // fault buffer for amplitude
 #define FLTBUF_TIME_STR                "fltBuf_time_cav%d"        // fault buffer for arrival time
 #define FLTBUF_CHARGE_STR              "fltBuf_charge_cav%d"      // fault buffer for charge
 #define FLTBUF_NCOPHASE_STR            "fltBuf_ncoPhase_cav%d"    // fault buffer for NCO phase 
 #define FLTBUF_PULSEID_STR             "fltBuf_pulseid"           // fault buffer for pulse id
+#define FLTBUF_STATUS_STR              "fltBuf_status"            // status of fault buffer
+#define FLTBUF_WRTPT_STR               "fltBuf_wrtpt"             // write pointer of fault buffer
 
 
 #endif /* _PCAVASYN_H */
