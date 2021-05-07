@@ -574,12 +574,16 @@ void pcavAsynDriver::pushCircularBuffer(bsss_packet_t *p)
     _circular_buffer.pulseid[wp] = _circular_buffer.pulseid[wp + FLTBUF_LEN] = PULSEID_(p->time);
 
     if(!_circular_buffer.empty) {    // check up if there is an arrival time jump
-        if(fabs(_circular_buffer.time0[wp + FLTBUF_LEN] - _circular_buffer.time0[wp - 1 + FLTBUF_LEN]) >= _circular_buffer.threshold ||
-           fabs(_circular_buffer.time1[wp + FLTBUF_LEN] - _circular_buffer.time1[wp - 1 + FLTBUF_LEN]) >= _circular_buffer.threshold) {  // a jump is detected
-            _circular_buffer.active = false;
-            _circular_buffer.empty  = true;
-            // post the circular buffer PVs.
-            postCircularBuffer(p);
+        if(_circular_buffer.valid0 && _circular_buffer.valid1) { // for invalid pulse
+            if( (fabs(_bld_data.time0 - _circular_buffer.last_time0) >= _circular_buffer.threshold) ||
+                (fabs(_bld_data.time1 - _circular_buffer.last_time1) >= _circular_buffer.threshold) ) { // need to freeze the circular buffer
+                _circular_buffer.active = false;
+                _circular_buffer.empty  = true;
+                // post the circular buffer PVs.
+                postCircularBuffer(p);
+            }
+            _circular_buffer.last_time0 = _bld_data.time0;
+            _circular_buffer.last_time1 = _bld_data.time1;
         }
     } else _circular_buffer.empty = false;
 
@@ -646,21 +650,29 @@ void pcavAsynDriver::calcBldData(bsss_packet_t *p)
     }
 
     if(_bld_data.charge0 >= _st_data.thresholdChrg0) {
+        _circular_buffer.valid0 = true;
         _st_data.validCnt0++;
         VAR_CALC(_bld_data.time0,   _st_data.var_gain0, _st_data.avg_time0,   _st_data.var_time0);
         VAR_CALC(_bld_data.charge0, _st_data.var_gain0, _st_data.avg_charge0, _st_data.var_charge0);
         _st_data.rms_time0   = sqrt(_st_data.var_time0);
         _st_data.rms_charge0 = sqrt(_st_data.var_charge0);
 
-    } else _st_data.invalidCnt0++;
+    } else {
+        _circular_buffer.valid0 = false;
+        _st_data.invalidCnt0++;
+    }
 
     if(_bld_data.charge1 >= _st_data.thresholdChrg1) {
+        _circular_buffer.valid1 = true;
         _st_data.validCnt1++;
         VAR_CALC(_bld_data.time1,   _st_data.var_gain1, _st_data.avg_time1,   _st_data.var_time1);
         VAR_CALC(_bld_data.charge1, _st_data.var_gain1, _st_data.avg_charge1, _st_data.var_charge1);
         _st_data.rms_time1   = sqrt(_st_data.var_time1);
         _st_data.rms_charge1 = sqrt(_st_data.var_charge1);
-    } else _st_data.invalidCnt1++;
+    } else {
+        _circular_buffer.valid1 = false;
+        _st_data.invalidCnt1++;
+    }
 
 
 

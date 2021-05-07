@@ -1,3 +1,6 @@
+R1.7.3      05-06-2021    Kukhee Kim (khkim)
+                        - bug fix: evaluate the phase jump only for valid pulses to freeeze the circular buffer
+
 R1.7.2      04-28-2021    Kukhee Kim (khkim)
                         - add circular buffer to record fault or unexpected phase jump (arriaval time jump)
                         - add status PV for the circular buffers

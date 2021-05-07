@@ -220,9 +220,15 @@ class pcavAsynDriver
             bool  active;
             bool  empty;
             int    wp;
+            
+            bool valid0;
+            bool valid1;
 
             double threshold;
             double latch_ncoPhase[2];
+
+            double last_time0;
+            double last_time1;
 
             double phase_c0p0[FLTBUF_LEN * 2];
             double phase_c0p1[FLTBUF_LEN * 2];
