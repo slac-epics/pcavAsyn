@@ -188,6 +188,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     // initialize the circular_buffer
     _circular_buffer.active = true;
     _circular_buffer.empty  = true;
+    _circular_buffer.force_freeze = false;
     _circular_buffer.wp = 0;
     _circular_buffer.latch_ncoPhase[0] = _circular_buffer.latch_ncoPhase[1] = 0.;
     for(int i = 0; i < FLTBUF_LEN *2; i++) {
@@ -238,7 +239,10 @@ asynStatus pcavAsynDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
                                                goto _escape;
     }
     else
-
+    if(function == p_freeze_fltbuf && value) { _circular_buffer.force_freeze = true; // freeeze circular buffer
+                                               goto _escape;
+    }
+    else
     for(int i = 0; i < NUM_CAV; i++) {
         if(function == p_cavFreqEvalStart[i]) {
             _pcav->setFreqEvalStart(i, (uint32_t) value); goto _escape;
@@ -548,7 +552,10 @@ void pcavAsynDriver::pollStream(void)
 
 void pcavAsynDriver::pushCircularBuffer(bsss_packet_t *p)
 {
-    if(!_circular_buffer.active) return;  // nonthing todo until the active flag turns back to active
+    if(!_circular_buffer.active) {
+        if(_circular_buffer.force_freeze) _circular_buffer.force_freeze = false; // ignore force freezing when circular buffer is not activated
+        return;  // nonthing todo until the active flag turns back to active
+    }
 
     int wp = _circular_buffer.wp;
 
@@ -573,17 +580,26 @@ void pcavAsynDriver::pushCircularBuffer(bsss_packet_t *p)
 
     _circular_buffer.pulseid[wp] = _circular_buffer.pulseid[wp + FLTBUF_LEN] = PULSEID_(p->time);
 
-    if(!_circular_buffer.empty) {    // check up if there is an arrival time jump
-        if(_circular_buffer.valid0 && _circular_buffer.valid1) { // for invalid pulse
-            if( (fabs(_bld_data.time0 - _circular_buffer.last_time0) >= _circular_buffer.threshold) ||
-                (fabs(_bld_data.time1 - _circular_buffer.last_time1) >= _circular_buffer.threshold) ) { // need to freeze the circular buffer
+    if(!_circular_buffer.empty) {    // check up if there is an arrival time jump when the buffer is not empty
+        if(_circular_buffer.valid0 && _circular_buffer.valid1) {                                             // evaluate only for valid pulses
+            if( (fabs(_bld_data.time0 - _circular_buffer.last_time0) >= _circular_buffer.threshold) ||       // time0 has a jump
+                (fabs(_bld_data.time1 - _circular_buffer.last_time1) >= _circular_buffer.threshold) ||       // time1 has a jump
+                 _circular_buffer.force_freeze) {                                                            // force freeze
                 _circular_buffer.active = false;
                 _circular_buffer.empty  = true;
+                if(_circular_buffer.force_freeze) _circular_buffer.force_freeze = false;
                 // post the circular buffer PVs.
                 postCircularBuffer(p);
             }
-            _circular_buffer.last_time0 = _bld_data.time0;
-            _circular_buffer.last_time1 = _bld_data.time1;
+            _circular_buffer.last_time0 = _bld_data.time0;            // update last valid time0
+            _circular_buffer.last_time1 = _bld_data.time1;            // update last valid time1
+        } else {                                                                                              // for invalid pulses
+            if(_circular_buffer.force_freeze) {                                                               // force freeze
+                _circular_buffer.active       = false;
+                _circular_buffer.empty        = true;
+                _circular_buffer.force_freeze = false;
+                postCircularBuffer(p);
+            }
         }
     } else _circular_buffer.empty = false;
 
@@ -903,6 +919,7 @@ void pcavAsynDriver::ParameterSetup(void)
     sprintf(param_name, BSSS_WF_STR); createParam(param_name, asynParamFloat64Array, &(p_bsss_wf));
 
     // for circular buffer (fault buffer)
+    sprintf(param_name, FREEZE_FLTBUF_STR);    createParam(param_name, asynParamInt32,      &p_freeze_fltbuf);
     sprintf(param_name, CLEAR_FLTBUF_STR);     createParam(param_name, asynParamInt32,      &p_clear_fltbuf);
     sprintf(param_name, THREDTIME_FLTBUF_STR); createParam(param_name, asynParamFloat64,    &p_thredtime_fltbuf);
     sprintf(param_name, FLTBUF_PULSEID_STR);   createParam(param_name, asynParamInt32Array, &p_fltbuf_pulseid);

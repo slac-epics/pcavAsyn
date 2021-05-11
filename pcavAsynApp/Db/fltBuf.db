@@ -32,6 +32,18 @@ record(bo, "$(DEVICE):CBUF:CLEAR")
     field(ONAM, "CLEAR")
 }
 
+record(bo, "$(DEVICE):CBUF:FREEZE")
+{
+    field(DESC, "Freeze circular buffers")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) freeze_fltbuf")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    field(ZNAM, "freeze")
+    field(ONAM, "FREEZE")
+}
+
+
 record(bi, "$(DEVICE):CBUF:STATUS")
 {
     field(DESC, "Status of circular buffers")

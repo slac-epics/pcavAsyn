@@ -1,3 +1,6 @@
+R1.7.4      05-10-2021    Kukhee Kim (khkim)
+                        - implement force freeze for the circular buffer
+
 R1.7.3      05-06-2021    Kukhee Kim (khkim)
                         - bug fix: evaluate the phase jump only for valid pulses to freeeze the circular buffer
 

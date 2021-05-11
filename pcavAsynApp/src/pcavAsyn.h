@@ -219,6 +219,7 @@ class pcavAsynDriver
         struct {
             bool  active;
             bool  empty;
+            bool  force_freeze;
             int    wp;
             
             bool valid0;
@@ -358,6 +359,8 @@ class pcavAsynDriver
 
         int p_bsss_wf;
 
+
+        int p_freeze_fltbuf;
         int p_clear_fltbuf;
         int p_thredtime_fltbuf;
         int p_fltbuf_phase[NUM_CAV][NUM_PROBE];
@@ -484,6 +487,7 @@ class pcavAsynDriver
 #define BSSS_WF_STR                    "bsss_wf"        // BSSS waveform beam rate update
 
 
+#define FREEZE_FLTBUF_STR              "freeze_fltbuf"            // force freeze circular buffer
 #define CLEAR_FLTBUF_STR               "clear_fltbuf"             // clear fault buffer
 #define THREDTIME_FLTBUF_STR           "thredtime_fltbuf"         // threshold time jump
 #define FLTBUF_PHASE_STR               "fltBuf_phase_cav%dP%d"    // fault buffer for phase
