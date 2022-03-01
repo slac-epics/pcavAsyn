@@ -1,3 +1,6 @@
+R1.7.5      02-22-2022    egumtow
+                        - update to asyn/R4.39-1.0.1
+
 R1.7.4      05-10-2021    Kukhee Kim (khkim)
                         - implement force freeze for the circular buffer
 
