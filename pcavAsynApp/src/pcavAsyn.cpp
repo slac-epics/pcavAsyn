@@ -43,6 +43,9 @@
 
 #define PULSEID_(time) ((time).nsec & 0x0001ffff)
 
+//#define NCMODE "NC"
+//#define SCMODE "SC"
+#define SCDIS(M) (M=="SC") ? if(1) : if(0)
 
 static bool            keep_stay_in_loop = true;
 static epicsEventId    shutdownEvent;
@@ -146,6 +149,7 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     pollCnt = 0;
     streamPollCnt = 0;
     current_bsss  = -1;
+    p_mode = "NC";
 
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
@@ -1066,7 +1070,7 @@ double pcavAsynDriver::getPhaseOffset(int cav, int probe)
 
 extern "C" {
 
-int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root)
+int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root, ...)
 {
     init_drvList();
 
@@ -1075,6 +1079,13 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
         printf("pcavAsynDriver found the port name (%s) has been used.\n", portName);
         return 0;
     }
+
+    // Check if we are running in superconducting mode
+    va_list arguments;
+    va_start( arguments, named_root );
+    char* mode = va_arg(arguments, char *);
+    va_end(arguments);
+    if (!strcmp(mode,"SC")) printf("Running PCAV in Super-Conducting mode");
 
     p = (pDrvList_t *) mallocMustSucceed(sizeof(pDrvList_t), "pcavAsynDriver: pcavAsynDriverConfigure()");
     p->named_root = (named_root && strlen(named_root))?epicsStrDup(named_root):cpswGetRootName();
@@ -1089,6 +1100,9 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
                                        (const char *) p->bsaPrefix, 
                                        (const char *) p->named_root);
     p->prv        = NULL;
+    
+    // Assign superconducting mode if applicable
+    if (!strcmp(mode,"SC")) p->pcavAsyn->setMode("SC");
 
     ellAdd(pDrvEllList, &p->node);
 
