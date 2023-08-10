@@ -43,10 +43,6 @@
 
 #define PULSEID_(time) ((time).nsec & 0x0001ffff)
 
-//#define NCMODE "NC"
-//#define SCMODE "SC"
-#define SCDIS(M) (M=="SC") ? if(1) : if(0)
-
 static bool            keep_stay_in_loop = true;
 static epicsEventId    shutdownEvent;
 
@@ -149,8 +145,8 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     pollCnt = 0;
     streamPollCnt = 0;
     current_bsss  = -1;
-    p_mode = "NC";
-
+    this->setMode('N');
+    
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
         p_pcav = p_root->findByName(pathString);
@@ -203,10 +199,9 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
         _circular_buffer.ncoPhase0[i]  = _circular_buffer.ncoPhase1[i]  = 0.;
         _circular_buffer.pulseid[i]    = 0;
     }
-
+    
     ParameterSetup();
     bsaSetup();
-
 }
 
 
@@ -542,12 +537,12 @@ void pcavAsynDriver::pollStream(void)
         setTimeStamp(&(p->time));
 
         if(p->chn_mask == 0xffff && p->payload[16]) {
-            calcBldData(p);
-            sendBldPacket(p);
-            pushBsaValues(p);
-            pushCircularBuffer(p);
-            bsssWf();
-            updateFastPVs();
+                          calcBldData(p);
+if(this->getMode()=='N')  sendBldPacket(p);
+if(this->getMode()=='N')  pushBsaValues(p);
+                          pushCircularBuffer(p);
+if(this->getMode()=='N')  bsssWf();
+                          updateFastPVs();
         }
     }
 
@@ -1070,7 +1065,8 @@ double pcavAsynDriver::getPhaseOffset(int cav, int probe)
 
 extern "C" {
 
-int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root, ...)
+//int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root)
+int pcavAsynDriverConfigure(const char *portName, const char *regPathString, const char *bsaStream, const char *bsaPrefix, const char *named_root, const char *timing_mode)
 {
     init_drvList();
 
@@ -1081,11 +1077,7 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
     }
 
     // Check if we are running in superconducting mode
-    va_list arguments;
-    va_start( arguments, named_root );
-    char* mode = va_arg(arguments, char *);
-    va_end(arguments);
-    if (!strcmp(mode,"SC")) printf("Running PCAV in Super-Conducting mode");
+    if (timing_mode && !strcmp(timing_mode,"SC")) printf("Running PCAV in Super-Conducting mode\n");
 
     p = (pDrvList_t *) mallocMustSucceed(sizeof(pDrvList_t), "pcavAsynDriver: pcavAsynDriverConfigure()");
     p->named_root = (named_root && strlen(named_root))?epicsStrDup(named_root):cpswGetRootName();
@@ -1102,10 +1094,10 @@ int pcavAsynDriverConfigure(const char *portName, const char *regPathString, con
     p->prv        = NULL;
     
     // Assign superconducting mode if applicable
-    if (!strcmp(mode,"SC")) p->pcavAsyn->setMode("SC");
+    if (timing_mode && !strcmp(timing_mode,"SC")) p->pcavAsyn->setMode('S');
 
     ellAdd(pDrvEllList, &p->node);
-
+    
     return 0;
 }
 
@@ -1116,19 +1108,22 @@ static const iocshArg initArg1 = {"register path", iocshArgString};
 static const iocshArg initArg2 = {"bsa stream",    iocshArgString};
 static const iocshArg initArg3 = {"bsa prefix",    iocshArgString};
 static const iocshArg initArg4 = {"named_root",    iocshArgString};
+static const iocshArg initArg5 = {"timing_mode",   iocshArgString};
 static const iocshArg * const initArgs[] = { &initArg0,
                                              &initArg1,
                                              &initArg2,
                                              &initArg3,
-                                             &initArg4 };
-static const iocshFuncDef initFuncDef = {"pcavAsynDriverConfigure", 5, initArgs};
+                                             &initArg4, 
+                                             &initArg5 };
+static const iocshFuncDef initFuncDef = {"pcavAsynDriverConfigure", 6, initArgs};
 static void  initCallFunc(const iocshArgBuf *args)
 {
     pcavAsynDriverConfigure(args[0].sval,
                             args[1].sval,
                             (args[2].sval && strlen(args[2].sval))? args[2].sval: NULL,
                             (args[3].sval && strlen(args[3].sval))? args[3].sval: NULL,
-                            (args[4].sval && strlen(args[4].sval))? args[4].sval: NULL);
+                            (args[4].sval && strlen(args[4].sval))? args[4].sval: NULL,
+                            (args[5].sval && strlen(args[5].sval))? args[5].sval: NULL);
 }
 
 static void pcavAsynDriverRegister(void)

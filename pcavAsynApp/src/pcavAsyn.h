@@ -102,7 +102,8 @@ class pcavAsynDriver
         void pushBsaValues(bsss_packet_t *p);
         void updateFastPVs(void);
 
-        void setMode(std::string mode) { strcpy(p_mode, mode.c_str()); }
+        void setMode(char mode) { p_mode = mode; }
+        char getMode(         ) { return p_mode; }
 
     private:
         double getPhaseOffset(int cav, int probe);
@@ -354,7 +355,7 @@ class pcavAsynDriver
 
         int p_reset;
 
-        char *p_mode;
+        char p_mode;
 
         // DacSigGen, baseline I&Q
         int i_baseband_wf;
