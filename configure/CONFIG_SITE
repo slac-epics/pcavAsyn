@@ -47,12 +47,22 @@ DIRECTORY_TARGETS += $(INSTALL_LOCATION_STARTUP)
 SHARED_LIBRARIES=NO
 STATIC_BUILD=YES
 
+# Note using PACKAGE_SITE_TOP from LCLS for PCDS as well
+PACKAGE_SITE_TOP=/afs/slac/g/lcls/package
 
 # Location of Linux Kernel Modules:
 LINUX_KERNEL_MODULES=$(PACKAGE_SITE_TOP)/linuxKernel_Modules
+ifeq ($(wildcard $(LINUX_KERNEL_MODULES)/*),)
+$(error LINUX_KERNEL_MODULES Not found: $(LINUX_KERNEL_MODULES))
+endif
 
 LINUXRT_BUILDROOT_VERSION=buildroot-2019.08
-LINUX_VERSION=rhel6
+ifdef T_A
+PKG_ARCH=$(T_A)
+endif
+
+# Location of Linux Kernel Modules:
+LINUX_KERNEL_MODULES=$(PACKAGE_SITE_TOP)/linuxKernel_Modules
 
 # CPSW
 CPSW_FRAMEWORK_PACKAGE_NAME=cpsw/framework
