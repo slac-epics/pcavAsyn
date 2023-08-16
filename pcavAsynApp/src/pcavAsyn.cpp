@@ -370,6 +370,8 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
             if(function == p_phaseOffset[i][j]) {
                 double phase_offset = value / 180.;
+                                
+                unsigned raw = _pcav->setPhaseOffset(i, j, phase_offset);
 
                 switch(i) {
                     case 0:
@@ -397,7 +399,6 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                 goto _escape;
             }
 
-
             if(function == p_weight[i].probe[j]) {
                _weight[i].probe[j] = value;
                double norm = _weight[i].probe[0] + _weight[i].probe[1];
@@ -405,6 +406,9 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                    _weight[i].probe[0] /= norm;
                    _weight[i].probe[1] /= norm;
                }
+                
+               unsigned raw = _pcav->setWeight(i, j, _weight[i].probe[j]);
+
                 goto _escape;
             }
         }  // probe loop

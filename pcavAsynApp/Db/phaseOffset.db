@@ -1,0 +1,25 @@
+#
+# Phase Offset Configuration
+#
+record(longout, "$(DEVICE):CAV$(CAV)PRB$(PRB)PHASEOFFSET")
+{
+    field(PINI, "YES")
+    field(DESC, "Phase offset for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0) cav$(CAV)prb$(PRB)PhaseOffset")
+    field(SCAN, "Passive")
+    field(OMSL, "supervisory")
+    info(autosaveFields, "VAL")
+}
+#
+# Phase Offset RBV Configuration
+#
+record(longin,  "$(DEVICE):CAV$(CAV)PRB$(PRB)PHASEOFFSETRBV")
+{
+    field(DESC, "Phase Offset RBV for Cav$(CAV)Prb$(PRB)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)prb$(PRB)PhaseOffsetRBV")
+    field(SCAN, "1 second")
+}
+
+
