@@ -82,21 +82,3 @@ file fltBufCavProb.db
             { "$(DEV)",     1,   1,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
 }
 
-file phaseOffset.db
-{
-    pattern {    DEVICE,     CAV,    PRB  }
-            {  "$(DEV)",       0,      0  }
-            {  "$(DEV)",       0,      1  }
-            {  "$(DEV)",       1,      0  }
-            {  "$(DEV)",       1,      1  }
-}
-
-file weight.db
-{
-    pattern {    DEVICE,     CAV,    PRB  }
-            {  "$(DEV)",       0,      0  }
-            {  "$(DEV)",       0,      1  }
-            {  "$(DEV)",       1,      0  }
-            {  "$(DEV)",       1,      1  }
-}
-

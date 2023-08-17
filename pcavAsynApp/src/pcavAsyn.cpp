@@ -149,14 +149,14 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
-        p_pcav = p_root->findByName(pathString);
+        p_pcav = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
         if(stream) _bstream = IStream::create(p_root->findByName(stream));
     } catch (CPSWError &e) {
         fprintf(stderr, "CPSW Error: %s, file %s, line %d\n", e.getInfo().c_str(), __FILE__, __LINE__);
         throw e;
     }
 
-    _pcav      = IpcavFw::create(p_pcav);
+    _pcav      = IpcavFw::create(p_root->findByName("mmio"));
     _dacSigGen = IdacSigGenFw::create(p_root->findByName("mmio"));
 
     for(int i = 0; i < NUM_CAV; i++) {
@@ -409,7 +409,7 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                 
                unsigned raw = _pcav->setWeight(i, j, _weight[i].probe[j]);
 
-                goto _escape;
+               goto _escape;
             }
         }  // probe loop
 

@@ -67,6 +67,17 @@ record(ao, "$(DEVICE):CAV$(CAV)PRB$(PRB)POFF")
     info(autosaveFields, "VAL")
 }
 
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)POFFRBV")
+{
+    field(DESC, "Phase Offset RBV for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) cav$(CAV)P$(PRB)PhaseOffset")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    field(EGU,  "Normalized Unit")
+    field(PREC, "3")
+    info(autosaveFields, "VAL")
+}
 
 record(calcout, "$(DEVICE):CAV$(CAV)PRB$(PRB)ZEROING")
 {
@@ -99,6 +110,15 @@ record(ao, "$(DEVICE):CAV$(CAV)PRB$(PRB)WGT")
     info(autosaveFields, "VAL")
 }
 
+record(ai, "$(DEVICE):CAV$(CAV)PRB$(PRB)WGTRBV")
+{
+    field(DESC, "Average Weight RBV for Cav$(CAV) Prb$(PRB)")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0) weightCav$(CAV)P$(PRB)")
+    field(SCAN, "I/O Intr")
+    field(PREC, "3")
+    info(autosaveFields, "VAL")
+}
 #DCImage
 # Cavity Probe reading, Raw Value
 #
