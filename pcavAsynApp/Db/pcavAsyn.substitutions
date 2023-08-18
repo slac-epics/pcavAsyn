@@ -81,3 +81,4 @@ file fltBufCavProb.db
             { "$(DEV)",     1,   0,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
             { "$(DEV)",     1,   1,   "asynFloat64ArrayOut",   "DOUBLE",   1024,    -2 }
 }
+

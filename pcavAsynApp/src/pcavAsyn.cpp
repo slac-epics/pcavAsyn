@@ -149,14 +149,14 @@ pcavAsynDriver::pcavAsynDriver(void *pDrv, const char *portName, const char *pat
     
     try {
         p_root = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
-        p_pcav = p_root->findByName(pathString);
+        p_pcav = (named_root && strlen(named_root))? cpswGetNamedRoot(named_root): cpswGetRoot();
         if(stream) _bstream = IStream::create(p_root->findByName(stream));
     } catch (CPSWError &e) {
         fprintf(stderr, "CPSW Error: %s, file %s, line %d\n", e.getInfo().c_str(), __FILE__, __LINE__);
         throw e;
     }
 
-    _pcav      = IpcavFw::create(p_pcav);
+    _pcav      = IpcavFw::create(p_root->findByName("mmio"));
     _dacSigGen = IdacSigGenFw::create(p_root->findByName("mmio"));
 
     for(int i = 0; i < NUM_CAV; i++) {
@@ -370,6 +370,8 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
             if(function == p_phaseOffset[i][j]) {
                 double phase_offset = value / 180.;
+                                
+                unsigned raw = _pcav->setPhaseOffset(i, j, phase_offset);
 
                 switch(i) {
                     case 0:
@@ -397,7 +399,6 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                 goto _escape;
             }
 
-
             if(function == p_weight[i].probe[j]) {
                _weight[i].probe[j] = value;
                double norm = _weight[i].probe[0] + _weight[i].probe[1];
@@ -405,16 +406,58 @@ asynStatus pcavAsynDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
                    _weight[i].probe[0] /= norm;
                    _weight[i].probe[1] /= norm;
                }
-                goto _escape;
+                
+               unsigned raw = _pcav->setWeight(i, j, _weight[i].probe[j]);
+
+               goto _escape;
             }
         }  // probe loop
 
     }  // cavity loop
 
-
     _escape:
     callParamCallbacks();
 
+    return status;
+}
+
+asynStatus pcavAsynDriver::readFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+    int32_t    raw;
+    int        function      = pasynUser->reason;
+    asynStatus status        = asynSuccess;
+    const char *functionName = "readFloat64";
+
+    for(int i = 0; i < NUM_CAV; i++) 
+    {
+        for(int j = 0; j < NUM_PROBE; j++) 
+        {
+            // Check parameter index
+            if(function == p_phaseOffset[i][j]) 
+            {
+                // Get the register value from the firmware interface
+                double val = _pcav -> getPhaseOffset(i,j,&raw);
+
+                // Set the parameter value in the parameter library
+                setDoubleParam (p_phaseOffset[i][j], val  );
+                
+                goto _escape;
+            }
+            else if(function == p_weight[i].probe[j]) 
+            {
+                // Get the register value from the firmware interface
+                double val = _pcav -> getWeight(i,j,&raw);
+
+                // Set the parameter value in the parameter library
+                setDoubleParam (p_weight[i].probe[j], val);
+                
+                goto _escape;
+            }
+        }
+    }
+    
+    _escape:
+    status = (asynStatus) callParamCallbacks();
     return status;
 }
 
@@ -858,9 +901,9 @@ void pcavAsynDriver::ParameterSetup(void)
             sprintf(param_name,     CAV_CALIB_COEFF_RAW_STR, cav, probe); createParam(param_name,  asynParamInt32,   &(p_cavCalibCoeffRaw[cav][probe]));
             sprintf(param_name,     PHASE_OFFSET_STR,     cav, probe); createParam(param_name,     asynParamFloat64, &(p_phaseOffset[cav][probe]));
             sprintf(param_name,     CAV_OUT_PHASEIU_STR,  cav, probe); createParam(param_name,     asynParamFloat64, &(p_cavOutPhaseIU[cav][probe]));
-
+  
             // average weight
-            sprintf(param_name,    WEIGHT_CAV_PROBE_STR, cav, probe); createParam(param_name, asynParamFloat64, &(p_weight[cav].probe[probe]));
+            sprintf(param_name,   WEIGHT_CAV_PROBE_STR,   cav, probe); createParam(param_name, asynParamFloat64, &(p_weight[cav].probe[probe]));
 
 
             sprintf(param_name,   VALIDCNT_NCOPID_PROBE_STR,    cav, probe); createParam(param_name, asynParamInt32,   &(p_nco_ctrl[cav].probe[probe].valid_cnt));
@@ -1000,6 +1043,9 @@ void pcavAsynDriver::monitor(void)
                                                     setDoubleParam(p_nco_ctrl[i].probe[j].mean_dcfreq, _nco_ctrl[i].probe[j].avg_dc_freq);
                                                     setDoubleParam(p_nco_ctrl[i].probe[j].rms_dcfreq,  _nco_ctrl[i].probe[j].rms_dc_freq);
 
+        
+            val = _pcav->getPhaseOffset(i,j,&raw);  setDoubleParam (p_phaseOffset[i][j],  val);
+            val = _pcav->getWeight(i,j,&raw);       setDoubleParam (p_weight[i].probe[j], val);
         }    // probe loop
 
         setDoubleParam(p_nco_ctrl[i].avg_dcfreq, _nco_ctrl[i].dc_freq);
