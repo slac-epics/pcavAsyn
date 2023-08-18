@@ -89,6 +89,7 @@ class pcavAsynDriver
         ~pcavAsynDriver();
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+        asynStatus readFloat64(asynUser *pasynUser, epicsFloat64 value);
         asynStatus writeFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements);
         void report(int interest);
         void fast_poll(void);
@@ -316,7 +317,7 @@ class pcavAsynDriver
        struct {
            int probe[NUM_PROBE];
        } p_weight[NUM_CAV];
-
+       
        struct {
            int ncoPidEnable;
            int kp, ki, kd;
