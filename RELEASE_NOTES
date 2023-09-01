@@ -1,3 +1,6 @@
+R1.8.0      09-01-2023    Michael Skoufis (skoufis)
+                        - add super-conducting mode for phase cavity
+
 R1.7.6      03-14-2022    Kukhee Kim (khkim)
                         - fix a path name name mistake in RELEASE: atcacommon to ATCACommon
                         - use yamlLoader R2.2.0
