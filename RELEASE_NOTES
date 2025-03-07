@@ -1,3 +1,12 @@
+R1.8.3      03-06-2025    Jeremy Lorelli (lorelli)
+                        - Update modules
+                                yamlLoader  R2.3.8
+                                ATCACommon  R2.0.4
+                        - Update packages
+                                cpsw        R4.5.1
+                                pcavLib     R1.2.1
+                        - Removed hardcoded /afs/ path in CONFIG_SITE
+
 R1.8.2      11-22-2024    Kukhee Kim (khkim)
                         - align with recent modules
                                 yamlLoader  R2.3.7
