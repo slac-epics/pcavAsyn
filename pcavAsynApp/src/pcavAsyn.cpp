@@ -502,6 +502,11 @@ void pcavAsynDriver::report(int interest)
     printf("\tpcavAsyn: bstream read size  : %u\n", stream_read_size);
     if(interest < 5) return;
 
+    printf("\t ----------- temporal debugging ----------------\n");
+    printf("\t charge threshold cavity 0   : %lf\n", _st_data.thresholdChrg0);
+    printf("\t charge threshold cavity 1   : %lf\n", _st_data.thresholdChrg1);
+    printf("\t -----------------------------------------------\n");
+
     char ts_str[80];
     uint32_t t =0, u =1;
     epicsTimeToStrftime(ts_str, sizeof(ts_str), "%Y/%m/%d %H:%M:%S.%09f", &((bsss_buf + current_bsss)->time));
